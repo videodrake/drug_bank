@@ -38,6 +38,9 @@ const STEMS = [
   { stem: '-dronate',  klass: '비스포스포네이트',               ex: 'alendronate, risedronate, ibandronate' },
   { stem: '-iramine',  klass: '항히스타민 (1세대)',             ex: 'chlorpheniramine, brompheniramine' },
   { stem: '-lamide',   klass: '탄산탈수효소 억제제',            ex: 'acetazolamide, dorzolamide' },
+  // 안과·소화기
+  { stem: '-prost',    klass: '프로스타글란딘 유사체',           ex: 'latanoprost, travoprost, misoprostol' },
+  { stem: '-setron',   klass: '5-HT3 길항 항구토제',            ex: 'ondansetron, granisetron, palonosetron' },
   // 표적치료·생물의약품
   { stem: '-tinib',    klass: '티로신 키나제 억제제',           ex: 'imatinib, gefitinib, dasatinib' },
   { stem: '-mab',      klass: '단클론항체',                     ex: 'rituximab, trastuzumab, adalimumab', warn: true, note: '2022년부터 신규 명명은 -tug/-bart/-mig/-ment로 분화' },
