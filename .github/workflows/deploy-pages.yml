@@ -29,11 +29,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Pages를 GitHub Actions 소스로 자동 활성화(enablement: true)
+      # Pages 설정 로드 (저장소 Settings에서 Pages를 먼저 활성화해 두어야 함)
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       # app/ 폴더를 사이트 루트로 업로드
       - name: Upload artifact
