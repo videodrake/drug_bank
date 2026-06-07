@@ -1,0 +1,20 @@
+{
+  "name": "약물 학습기 · 다빈도 처방 약물",
+  "short_name": "약물 학습기",
+  "description": "다빈도 처방 약물 300종을 계열·간격반복·인출연습으로 익히는 학습 앱",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1420",
+  "theme_color": "#0f1420",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -26,6 +26,8 @@ body {
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%; -webkit-text-size-adjust: 100%;
 }
 
 /* ===== 상단바 ===== */
@@ -34,6 +36,9 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; flex-wrap: wrap;
   padding: 14px 22px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  padding-left: max(22px, env(safe-area-inset-left));
+  padding-right: max(22px, env(safe-area-inset-right));
   background: rgba(15,20,32,.82);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -58,6 +63,8 @@ body {
 }
 .tab:hover { color: var(--text); background: var(--panel); }
 .tab.active { color: #fff; background: var(--primary); box-shadow: 0 4px 14px rgba(91,141,239,.4); }
+.tab .t-short { display: none; }
+.card { cursor: pointer; }
 .badge {
   display: inline-block; min-width: 20px; padding: 1px 6px; margin-left: 4px;
   font-size: 11px; font-weight: 700; text-align: center;
@@ -227,8 +234,44 @@ main { max-width: 1040px; margin: 0 auto; padding: 26px 22px 60px; }
 .link-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 12px; text-decoration: underline; }
 .link-btn:hover { color: var(--bad); }
 
-@media (max-width: 600px) {
-  .btn-row { grid-template-columns: repeat(2, 1fr); }
-  .card .front { font-size: 24px; }
-  .tab { padding: 8px 10px; font-size: 13px; }
+@media (max-width: 640px) {
+  main { padding: 18px 16px calc(86px + env(safe-area-inset-bottom)); }
+  .view-head h2 { font-size: 21px; }
+  .subtitle { display: none; }
+  .topbar { padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); }
+
+  /* 탭을 하단 고정 바로 (엄지 도달 영역) */
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    gap: 2px; flex-wrap: nowrap; justify-content: space-around;
+    background: rgba(15,20,32,.96); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tab {
+    flex: 1; min-width: 0; text-align: center;
+    padding: 8px 2px; font-size: 11px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .tab.active { box-shadow: none; }
+  .tab .t-full { display: none; }
+  .tab .t-short { display: inline; }
+  .badge { margin-left: 0; }
+
+  /* 터치 영역·가독성 */
+  .btn-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .btn.rate { padding: 15px 6px; }
+  .card { padding: 26px 20px; min-height: 320px; }
+  .card .front { font-size: 26px; }
+  .drug-row { padding: 14px 12px; }
+  .class-card .head { padding: 16px; }
+  .chip { padding: 9px 15px; }
+  .opt { padding: 16px; }
+  .stem-grid { grid-template-columns: 1fr 1fr; }
+  .footer { padding: 16px 16px calc(80px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 380px) {
+  .stem-grid { grid-template-columns: 1fr; }
+  .tab { font-size: 10px; }
 }

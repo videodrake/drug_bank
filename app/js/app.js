@@ -160,11 +160,16 @@
       </div>
     </div>`;
 
-    document.getElementById('flipBtn').onclick = () => {
-      document.getElementById('card').classList.add('flipped');
+    const flip = () => {
+      const card = document.getElementById('card');
+      if (card.classList.contains('flipped')) return;
+      card.classList.add('flipped');
       document.getElementById('flipBtn').style.display = 'none';
       document.getElementById('rateRow').style.display = 'grid';
     };
+    document.getElementById('flipBtn').onclick = flip;
+    // 모바일: 카드 아무 곳이나 탭하면 뒤집기
+    document.getElementById('card').addEventListener('click', flip);
     document.getElementById('rateRow').onclick = e => {
       const b = e.target.closest('.btn.rate');
       if (!b) return;
