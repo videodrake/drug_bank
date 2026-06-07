@@ -18,6 +18,18 @@
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const sample = (a, n) => shuffle(a).slice(0, n);
 
+  // 임상 보강 정보(details.js 오버레이)
+  const dEsc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const detailOf = id => (typeof DRUG_DETAILS !== 'undefined' ? DRUG_DETAILS[id] : null);
+  function detailRows(d) {
+    const x = detailOf(d.id); if (!x) return '';
+    return `
+      <div class="row"><span class="k">상호작용</span> ${dEsc(x.interactions)}</div>
+      <div class="row"><span class="k">임부·수유</span> ${dEsc(x.pregnancy)}</div>
+      <div class="row"><span class="k">신·간 조절</span> ${dEsc(x.renal)}</div>
+      <div class="row"><span class="k">복약지도</span> ${dEsc(x.counseling)}</div>`;
+  }
+
   // 원형 진행 링 (SVG)
   function ringSVG(pct, top, bot) {
     const r = 42, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(100, pct)) / 100);
@@ -305,6 +317,7 @@
             <div class="row"><span class="k">금기·주의</span> ${d.contraindication}</div>
             <div class="row"><span class="k">용법용량</span> ${d.dose}</div>
             ${d.note ? `<div class="row"><span class="k">메모</span> ${d.note}</div>` : ''}
+            ${detailRows(d)}
           </div>
         </div>
       </div>
@@ -440,6 +453,7 @@
           <div class="row"><span class="k">부작용</span> ${d.sideEffects}</div>
           <div class="row"><span class="k">금기</span> ${d.contraindication}</div>
           <div class="row"><span class="k">용량</span> ${d.dose}</div>
+          ${detailRows(d)}
         </div>
       </div>
       <button class="btn primary full" id="flipBtn" style="margin-top:16px">답 확인 (먼저 떠올려 보세요)</button>
@@ -549,6 +563,7 @@
           <div><span class="k">기전</span>${oneLine(d.moa)}</div>
           <div><span class="k">적응증</span>${oneLine(d.indication)}</div>
           <div class="warn"><span class="k">주의</span>${oneLine(d.contraindication)}</div>
+          ${detailOf(d.id) ? `<div><span class="k">복약</span>${dEsc(oneLine(detailOf(d.id).counseling))}</div>` : ''}
         </div>
         <div class="flow-count">${F.idx + 1} / ${F.pool.length} · 탭하면 일시정지</div>
       </div>`;
