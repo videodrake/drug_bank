@@ -33,9 +33,17 @@
       <button class="tab" data-view="review"><span class="t-full">복습</span><span class="t-short">복습</span> <span class="badge" id="dueBadge">0</span></button>
       <button class="tab" data-view="quiz"><span class="t-full">퀴즈</span><span class="t-short">퀴즈</span></button>
       <button class="tab" data-view="flow"><span class="t-full">쏙쏙</span><span class="t-short">쏙쏙</span></button>
+      <button class="tab" data-view="mechanism"><span class="t-full">기전</span><span class="t-short">기전</span></button>
       <button class="tab" data-view="stems"><span class="t-full">어간 사전</span><span class="t-short">어간</span></button>
     </nav>
   </header>
+
+  <!-- 공용 화살촉 마커 (기전 다이어그램용) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs></svg>
 
   <main id="app">
     <!-- 홈 -->
@@ -79,6 +87,16 @@
       <div id="flowArea"></div>
     </section>
 
+    <!-- 기전 (계열별 작용기전 다이어그램) -->
+    <section class="view" id="view-mechanism">
+      <div class="view-head">
+        <h2>기전 <span class="muted small">계열별 작용 그림</span></h2>
+        <p class="muted">화살표(→)는 작용 경로, 빨강 ✕ 는 약물이 차단하는 지점입니다.</p>
+      </div>
+      <div class="filter-row" id="mechFilter"></div>
+      <div id="mechList"></div>
+    </section>
+
     <!-- 어간 사전 -->
     <section class="view" id="view-stems">
       <div class="view-head">
@@ -101,6 +119,7 @@
 
   <script src="data/drugs.js"></script>
   <script src="data/details.js"></script>
+  <script src="data/mechanisms.js"></script>
   <script src="data/stems.js"></script>
   <script src="js/srs.js"></script>
   <script src="js/progress.js"></script>

@@ -141,6 +141,7 @@
     if (name === 'review') startReview();
     if (name === 'quiz') startQuiz();
     if (name === 'flow') startFlow();
+    if (name === 'mechanism') renderMechanism();
     if (name === 'stems') renderStems();
     window.scrollTo(0, 0);
   }
@@ -570,6 +571,30 @@
     document.getElementById('flowCard').onclick = togglePlay;
   }
   function oneLine(s) { const t = String(s).split(/[,(·]/)[0].trim(); return t.length > 42 ? t.slice(0, 42) + '…' : t; }
+
+  /* ---------- 기전 다이어그램 ---------- */
+  let mechSys = '전체';
+  function renderMechanism() {
+    if (typeof MECHANISMS === 'undefined') return;
+    const systems = ['전체', ...new Set(MECHANISMS.map(m => m.sys))];
+    document.getElementById('mechFilter').innerHTML = systems.map(s =>
+      `<button class="chip ${s === mechSys ? 'active' : ''}" data-sys="${esc(s)}">${s}</button>`).join('');
+    document.getElementById('mechFilter').onclick = e => {
+      const c = e.target.closest('.chip'); if (!c) return; mechSys = c.dataset.sys; renderMechanism();
+    };
+    const list = mechSys === '전체' ? MECHANISMS : MECHANISMS.filter(m => m.sys === mechSys);
+    document.getElementById('mechList').innerHTML = list.map(m => `
+      <div class="mech-card">
+        <div class="mech-h">
+          <span class="mech-sys">${m.sys}</span>
+          <h3>${m.title}</h3>
+        </div>
+        <div class="mech-classes">${m.classes}</div>
+        <div class="mech-diagram">${m.svg}</div>
+        <p class="mech-desc">${m.desc}</p>
+        <ul class="mech-points">${m.points.map(p => `<li>${p}</li>`).join('')}</ul>
+      </div>`).join('');
+  }
 
   /* ---------- 어간 사전 ---------- */
   function renderStems() {
