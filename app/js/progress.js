@@ -10,9 +10,9 @@ const Progress = (() => {
   const DAILY_GOAL = 20;
 
   let s = load();
-  function blank() { return { lessons: {}, daily: { date: '', learned: 0 }, streak: { count: 0, last: '' } }; }
+  function blank() { return { lessons: {}, daily: { date: '', learned: 0 }, streak: { count: 0, last: '' }, quiz: { total: 0, correct: 0, sessions: 0, best: 0 } }; }
   function load() {
-    try { const o = JSON.parse(localStorage.getItem(KEY)); return (o && o.lessons) ? o : blank(); }
+    try { const o = JSON.parse(localStorage.getItem(KEY)); if (!o || !o.lessons) return blank(); if (!o.quiz) o.quiz = { total: 0, correct: 0, sessions: 0, best: 0 }; return o; }
     catch { return blank(); }
   }
   function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
@@ -71,7 +71,19 @@ const Progress = (() => {
     return { mastered, studied, total: klasses.length };
   }
 
+  // 랜덤 퀴즈 누적 통계
+  function recordQuizSession(correct, total) {
+    s.quiz.total += total; s.quiz.correct += correct; s.quiz.sessions += 1;
+    const pct = total ? Math.round(correct / total * 100) : 0;
+    if (pct > s.quiz.best) s.quiz.best = pct;
+    save();
+  }
+  function quizStats() {
+    const q = s.quiz || { total: 0, correct: 0, sessions: 0, best: 0 };
+    return { ...q, acc: q.total ? Math.round(q.correct / q.total * 100) : 0 };
+  }
+
   function reset() { s = blank(); localStorage.removeItem(KEY); }
 
-  return { lesson, markStudied, recordQuiz, status, addLearned, todayLearned, goal, streak, summary, reset };
+  return { lesson, markStudied, recordQuiz, status, addLearned, todayLearned, goal, streak, summary, recordQuizSession, quizStats, reset };
 })();

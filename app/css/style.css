@@ -485,3 +485,36 @@ main { max-width: 1040px; margin: 0 auto; padding: 26px 22px 60px; }
   * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .view { animation: none; }
 }
+
+/* ============================================================
+ * 원형 진행 링 · 컨페티 · 퀴즈 통계
+ * ============================================================ */
+.home-hero { display: flex; align-items: center; gap: 18px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px; }
+.home-hero-side { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.ring { flex-shrink: 0; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--bg-soft); stroke-width: 9; }
+.ring-fg { fill: none; stroke: url(#g); stroke: var(--accent); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.ring text { transform: rotate(90deg); transform-origin: 50px 50px; text-anchor: middle; fill: var(--text); }
+.ring-top { font-size: 22px; font-weight: 900; }
+.ring-bot { font-size: 10px; fill: var(--muted); }
+.home-hero .streak { background: none; border: none; padding: 0; flex-direction: row; gap: 6px; min-width: 0; align-items: center; }
+.home-hero .streak b { font-size: 20px; }
+.home-hero .goal { background: none; border: none; padding: 0; }
+
+/* 컨페티 */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 95; overflow: hidden; }
+.confetti i { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(106vh) rotate(680deg); opacity: .85; } }
+
+/* 퀴즈 인트로 / 통계 / 결과 */
+.quiz-intro { text-align: center; padding: 24px 12px; }
+.quiz-intro .big { font-size: 48px; margin-bottom: 6px; }
+.quiz-intro h3 { margin: 4px 0 6px; font-size: 20px; }
+.quiz-stats-row { display: flex; gap: 10px; justify-content: center; margin: 14px 0 0; }
+.quiz-stats-row > div { flex: 1; max-width: 110px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 10px 6px; }
+.quiz-stats-row b { display: block; font-size: 20px; font-weight: 900; }
+.quiz-stats-row span { font-size: 11px; color: var(--muted); }
+.wrong-list { margin-top: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.wl-title { font-size: 13px; font-weight: 700; color: var(--bad); margin-bottom: 6px; }
+.wl-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.wl-row:last-child { border-bottom: none; }

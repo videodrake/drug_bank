@@ -18,28 +18,94 @@
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const sample = (a, n) => shuffle(a).slice(0, n);
 
-  /* ---------- 레슨 구성 (다종 계열=그 자체, 1종 계열들=단원 내 묶음) ----------
-     레슨: { id, title, cat, drugs[] }  — id는 첫 약물 id 기반(안정적) */
-  const BUNDLE = 5;
+  // 원형 진행 링 (SVG)
+  function ringSVG(pct, top, bot) {
+    const r = 42, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    return `<svg class="ring" viewBox="0 0 100 100" width="98" height="98" aria-hidden="true">
+      <circle class="ring-bg" cx="50" cy="50" r="${r}"></circle>
+      <circle class="ring-fg" cx="50" cy="50" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"></circle>
+      <text class="ring-top" x="50" y="50">${top}</text>
+      <text class="ring-bot" x="50" y="66">${bot}</text>
+    </svg>`;
+  }
+  // 컨페티 (라이브러리 없이)
+  function confetti() {
+    const wrap = document.createElement('div'); wrap.className = 'confetti';
+    const colors = ['#5b8def', '#2dd4bf', '#34d399', '#fbbf24', '#f87171', '#f0b429'];
+    for (let i = 0; i < 80; i++) {
+      const p = document.createElement('i');
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random() * 0.35).toFixed(2) + 's';
+      p.style.animationDuration = (1.4 + Math.random() * 0.9).toFixed(2) + 's';
+      wrap.appendChild(p);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 2600);
+  }
+
+  /* ---------- 레슨 구성 ----------
+     다종 계열 = 그 자체 레슨. 1종짜리 계열들은 '기전/효능군' 키워드로 묶음.
+     레슨: { id, title, cat, drugs[], multi } — id는 첫 약물 id 기반(안정적) */
+  const CHUNK = 6;
+  // klass에서 기전·효능군 추출 (위에서부터 먼저 매칭)
+  const GROUPS = [
+    [/이뇨/, '이뇨제'],
+    [/항응고|헤파린|DOAC|비타민K 길항/, '항응고제'],
+    [/항혈소판/, '항혈소판제'],
+    [/지혈|섬유소/, '지혈제'],
+    [/질산염|강심|항부정맥|If 전류/, '심장·부정맥약'],
+    [/지질|스타틴|피브|콜레스테롤/, '이상지질혈증약'],
+    [/α1|α2|혈관확장|ARNI|레닌/, '기타 혈압약'],
+    [/인슐린/, '인슐린'],
+    [/갑상선/, '갑상선약'],
+    [/글루코코르티코이드|코르티코|광물코르티코/, '스테로이드'],
+    [/에스트로겐|프로게스|안드로겐|피임|성장호르몬|옥시토신|배란|항이뇨호르몬/, '호르몬제'],
+    [/비타민|엽산|철분|적혈구생성/, '비타민·조혈제'],
+    [/칼륨|칼슘|마그네슘|중탄산|알칼리|전해질|수액/, '전해질·수액'],
+    [/백신/, '백신'],
+    [/면역억제|칼시뉴린|IMPDH|퓨린/, '면역억제제'],
+    [/생물학적|단클론|TNF|IL-6|RANKL/, '생물학적제제'],
+    [/항암|알킬화|항대사|미세소관|안트라|백금|GnRH|아로마타제|SERM|키나제|관문|CDK|면역조절|안드로겐 합성|항안드로겐/, '항암제'],
+    [/오피오이드|마취|진해|거담|점액/, '진통·마취·호흡'],
+    [/NSAID|해열|통풍|근이완|DMARD|레티노이드/, '소염·근골격'],
+    [/완하|지사|제산|점막보호|운동촉진|5-ASA|담즙|소포|항구토|진경|장관/, '소화기 기타'],
+    [/SSRI|SNRI|TCA|항우울|항정신병|기분|수면|항불안|자극제|치매|NMDA|콜린에스터|파킨슨|항전간|편두통/, '신경·정신 기타'],
+    [/점안|녹내장|산동|윤활/, '안과 점안'],
+    [/방광|전립선|5α|PDE5|결석/, '비뇨·생식 기타'],
+    [/항진균|항바이러스|항결핵|요로 항균|살충|국소 항생|린코사마이드|아미노글리코사이드|글리코펩타이드|니트로|설폰아미드/, '기타 항감염'],
+  ];
+  function groupKey(d) {
+    const k = d.klass || '';
+    for (const [re, label] of GROUPS) if (re.test(k)) return label;
+    return d.category + ' 기타';
+  }
   let _lessons = null;
   function buildLessons() {
     if (_lessons) return _lessons;
     const byCat = {}; const flat = [];
     categories().forEach(cat => {
-      const lessons = []; let bucket = [];
-      const flush = () => {
-        if (!bucket.length) return;
-        const names = bucket.map(d => d.generic);
-        const title = names.slice(0, 3).join(' · ') + (names.length > 3 ? ` 외 ${names.length - 3}종` : '');
-        lessons.push({ id: 'L:' + bucket[0].id, title: '묶음 · ' + title, cat, drugs: bucket.slice() });
-        bucket = [];
-      };
+      const lessons = []; const singles = [];
       classesInCategory(cat).forEach(k => {
         const ds = drugsInClass(k);
-        if (ds.length >= 2) { lessons.push({ id: 'L:' + ds[0].id, title: k, cat, drugs: ds }); }
-        else { bucket.push(ds[0]); if (bucket.length >= BUNDLE) flush(); }
+        if (ds.length >= 2) lessons.push({ id: 'L:' + ds[0].id, title: k, cat, drugs: ds, multi: true });
+        else singles.push(ds[0]);
       });
-      flush();
+      // 1종짜리들을 기전군으로 묶음. 1종뿐인 기전군은 '○○ 기타'로 합쳐 파편화 방지
+      const groups = new Map();
+      singles.forEach(d => { const key = groupKey(d); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(d); });
+      const leftover = [];
+      const named = [];
+      groups.forEach((ds, key) => { if (ds.length >= 2) named.push([key, ds]); else leftover.push(ds[0]); });
+      if (leftover.length) named.push([cat + ' 기타', leftover]);
+      named.forEach(([key, ds]) => {
+        const parts = Math.ceil(ds.length / CHUNK);
+        for (let i = 0; i < ds.length; i += CHUNK) {
+          const chunk = ds.slice(i, i + CHUNK);
+          const title = key + (parts > 1 ? ` (${Math.floor(i / CHUNK) + 1})` : '');
+          lessons.push({ id: 'L:' + chunk[0].id, title, cat, drugs: chunk, multi: false });
+        }
+      });
       byCat[cat] = lessons; lessons.forEach(l => flat.push(l));
     });
     _lessons = { byCat, flat, map: Object.fromEntries(flat.map(l => [l.id, l])) };
@@ -94,12 +160,16 @@
            <button class="btn primary full" id="homeReview">🔁 복습하러 가기</button>
          </div>`;
 
+    const masteryPct = sum.total ? Math.round(sum.mastered / sum.total * 100) : 0;
     document.getElementById('homeArea').innerHTML = `
-      <div class="home-top">
-        <div class="streak"><span class="fire">🔥</span><b>${streak}</b><span class="muted small">일 연속</span></div>
-        <div class="goal">
-          <div class="goal-row"><span>오늘의 목표</span><span class="muted">${learnedToday} / ${goal}</span></div>
-          <div class="bar"><span style="width:${goalPct}%"></span></div>
+      <div class="home-hero">
+        ${ringSVG(masteryPct, masteryPct + '%', '마스터')}
+        <div class="home-hero-side">
+          <div class="streak"><span class="fire">🔥</span><b>${streak}</b><span class="muted small">일 연속</span></div>
+          <div class="goal">
+            <div class="goal-row"><span>오늘의 목표</span><span class="muted">${learnedToday} / ${goal}</span></div>
+            <div class="bar"><span style="width:${goalPct}%"></span></div>
+          </div>
         </div>
       </div>
       ${continueCard}
@@ -152,11 +222,14 @@
         const st = Progress.status(l.id);
         const best = Progress.lesson(l.id).quizBest;
         const icon = st === 'mastered' ? '✓' : st === 'studied' ? '◐' : (i + 1);
+        const sub = l.multi
+          ? `${l.drugs.length}종 · 대표 ${proto.generic}`
+          : `${l.drugs.length}종 · ${l.drugs.slice(0, 3).map(d => d.generic).join(', ')}${l.drugs.length > 3 ? '…' : ''}`;
         return `<button class="lesson ${st}" data-lesson="${esc(l.id)}">
             <span class="lesson-ic">${icon}</span>
             <span class="lesson-main">
               <span class="lesson-name">${l.title}</span>
-              <span class="lesson-sub">${l.drugs.length}종${l.title.startsWith('묶음') ? '' : ' · 대표 ' + proto.generic}${best ? ' · 최고 ' + best + '%' : ''}</span>
+              <span class="lesson-sub">${sub}${best ? ' · 최고 ' + best + '%' : ''}</span>
             </span>
             <span class="lesson-go">▸</span>
           </button>`;
@@ -305,8 +378,10 @@
   function renderResultPhase() {
     const inner = document.getElementById('studyInner');
     const pct = Math.round(L.correct / L.q.length * 100);
+    const wasMastered = Progress.status(L.id) === 'mastered';
     Progress.recordQuiz(L.id, pct);
-    const mastered = Progress.status(L.id) === `mastered`;
+    const mastered = Progress.status(L.id) === 'mastered';
+    if (pct >= PASS && (!wasMastered)) confetti();
     inner.innerHTML = `
       ${lessonBar(L.title + ` · 결과`)}
       <div class="result">
@@ -327,7 +402,7 @@
     const rClose = document.getElementById('rClose'); if (rClose) rClose.onclick = () => { closeLesson(); showView('learn'); };
     const rNext = document.getElementById('rNext'); if (rNext) rNext.onclick = () => {
       const nk = nextLesson();
-      if (nk) startLesson(nk); else { closeLesson(); showView('home'); }
+      if (nk) startLesson(nk.id); else { closeLesson(); showView('home'); }
     };
   }
 
@@ -398,12 +473,31 @@
       </div>`).join('');
   }
 
-  /* ---------- 랜덤 퀴즈 (인터리빙) ---------- */
-  let quizScore = 0, quizTotal = 0;
-  function startQuiz() { quizScore = 0; quizTotal = 0; nextQuiz(); }
+  /* ---------- 랜덤 퀴즈 (인터리빙, 10문제 세션) ---------- */
+  const QUIZ_N = 10;
+  let quizScore = 0, quizNum = 0, quizWrong = [];
+  function startQuiz() {
+    const area = document.getElementById('quizArea');
+    const st = Progress.quizStats();
+    area.innerHTML = `<div class="quiz-wrap">
+      <div class="quiz-intro">
+        <div class="big">📝</div>
+        <h3>랜덤 퀴즈 ${QUIZ_N}문제</h3>
+        <p class="muted">여러 계열을 섞어 출제합니다. 약물명 → 계열 / 적응증을 맞혀보세요.</p>
+        <div class="quiz-stats-row">
+          <div><b>${st.sessions}</b><span>세션</span></div>
+          <div><b>${st.acc}%</b><span>평균 정답률</span></div>
+          <div><b>${st.best}%</b><span>최고</span></div>
+        </div>
+        <button class="btn primary full" id="quizStart" style="margin-top:16px">시작하기</button>
+      </div>
+    </div>`;
+    document.getElementById('quizStart').onclick = () => { quizScore = 0; quizNum = 0; quizWrong = []; nextQuiz(); };
+  }
   function nextQuiz() {
     const area = document.getElementById('quizArea');
     if (DRUGS.length < 4) { area.innerHTML = `<div class="empty"><div class="big">🧩</div>약물이 더 필요합니다.</div>`; return; }
+    if (quizNum >= QUIZ_N) return renderQuizResult();
     const d = DRUGS[Math.floor(Math.random() * DRUGS.length)];
     const mode = Math.random() < 0.5 ? 'class' : 'indication';
     const qText = mode === 'class' ? `<b>${d.generic}</b> (${d.genericEn}) 의 계열은?` : `<b>${d.generic}</b> 의 주 적응증으로 옳은 것은?`;
@@ -411,17 +505,48 @@
     const distractors = sample(DRUGS.filter(x => (mode === 'class' ? x.klass !== d.klass : x.indication !== d.indication)).map(x => mode === 'class' ? x.klass : x.indication), 3);
     const opts = shuffle([correct, ...new Set(distractors)].slice(0, 4));
     area.innerHTML = `<div class="quiz-wrap">
-      <div class="quiz-score">점수 ${quizScore} / ${quizTotal}</div>
+      <div class="progress-line"><span>${quizNum + 1} / ${QUIZ_N}</span><span>맞힘 ${quizScore}</span></div>
+      <div class="study-prog"><span style="width:${quizNum / QUIZ_N * 100}%"></span></div>
       <div class="quiz-q"><div class="qtext">${qText}</div><div class="qsub">${mode === 'class' ? '어간 힌트: ' + (d.stem || '없음') : d.klass}</div></div>
       <div class="quiz-opts">${opts.map(o => `<button class="opt" data-o="${esc(o)}">${o}</button>`).join('')}</div>
     </div>`;
     area.querySelector('.quiz-opts').onclick = e => {
-      const b = e.target.closest('.opt'); if (!b) return;
-      quizTotal++;
+      const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+      const ok = b.dataset.o === correct;
       area.querySelectorAll('.opt').forEach(o => { o.disabled = true; if (o.dataset.o === correct) o.classList.add('correct'); else if (o === b) o.classList.add('wrong'); });
-      if (b.dataset.o === correct) quizScore++;
-      setTimeout(nextQuiz, 1100);
+      if (ok) quizScore++; else quizWrong.push({ name: d.generic, ans: correct });
+      quizNum++;
+      setTimeout(nextQuiz, ok ? 700 : 1300);
     };
+  }
+  function renderQuizResult() {
+    const area = document.getElementById('quizArea');
+    const pct = Math.round(quizScore / QUIZ_N * 100);
+    Progress.recordQuizSession(quizScore, QUIZ_N);
+    if (pct >= 90) confetti();
+    const st = Progress.quizStats();
+    const wrongHTML = quizWrong.length
+      ? `<div class="wrong-list"><div class="wl-title">틀린 문제</div>${quizWrong.map(w => `<div class="wl-row"><span>${w.name}</span><span class="muted">${w.ans}</span></div>`).join('')}</div>`
+      : `<p class="muted">전부 정답! 완벽해요 🎯</p>`;
+    area.innerHTML = `<div class="quiz-wrap">
+      <div class="result">
+        <div class="big">${pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : '💪'}</div>
+        <div class="result-score ${pct >= 70 ? 'pass' : 'fail'}">${pct}%</div>
+        <div class="result-sub">${quizScore} / ${QUIZ_N} 정답</div>
+        <div class="quiz-stats-row" style="margin-top:14px">
+          <div><b>${st.sessions}</b><span>총 세션</span></div>
+          <div><b>${st.acc}%</b><span>평균</span></div>
+          <div><b>${st.best}%</b><span>최고</span></div>
+        </div>
+      </div>
+      ${wrongHTML}
+      <div class="hero-btns" style="justify-content:center;margin-top:18px">
+        <button class="btn primary" id="qAgain">다시 풀기</button>
+        <button class="btn ghost" id="qHome">홈으로</button>
+      </div>
+    </div>`;
+    document.getElementById('qAgain').onclick = () => { quizScore = 0; quizNum = 0; quizWrong = []; nextQuiz(); };
+    document.getElementById('qHome').onclick = () => showView('home');
   }
 
   /* ---------- 공통 ---------- */
@@ -429,7 +554,7 @@
     const srs = SRS.stats(allIds());
     const due = srs.dueCount + Math.min(srs.newCount, NEW_PER_DAY);
     document.getElementById('dueBadge').textContent = due > 999 ? 999 : due;
-    const ks = allClasses(); const sum = Progress.summary(ks);
+    const sum = Progress.summary(lessonIds());
     document.getElementById('footStats').textContent =
       `레슨 마스터 ${sum.mastered}/${sum.total} · 복습대기 ${srs.dueCount} · 🔥${Progress.streak()}일`;
   }
