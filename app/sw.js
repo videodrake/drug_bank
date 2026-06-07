@@ -1,10 +1,11 @@
 /* 서비스워커 — 앱 셸 캐시 (오프라인 학습 지원) */
-const CACHE = 'drug-study-v3';
+const CACHE = 'drug-study-v4';
 const ASSETS = [
   '.',
   'index.html',
   'css/style.css',
   'js/srs.js',
+  'js/progress.js',
   'js/app.js',
   'data/drugs.js',
   'data/stems.js',

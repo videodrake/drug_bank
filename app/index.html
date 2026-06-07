@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>약물 학습기 · 다빈도 처방 약물</title>
-  <meta name="description" content="다빈도 처방 약물 300종을 계열·간격반복·인출연습으로 익히는 학습 앱" />
+  <meta name="description" content="다빈도 처방 약물 300종을 단원·레슨으로 체계적으로 익히는 학습 앱" />
   <!-- 모바일/PWA -->
   <meta name="theme-color" content="#0f1420" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -24,80 +24,62 @@
       <span class="logo">℞</span>
       <div>
         <h1>약물 학습기</h1>
-        <p class="subtitle">다빈도 처방 약물 · 근거 기반 학습법</p>
+        <p class="subtitle">다빈도 처방 약물 · 체계적 학습</p>
       </div>
     </div>
     <nav class="tabs" id="tabs">
-      <button class="tab active" data-view="dashboard"><span class="t-full">대시보드</span><span class="t-short">홈</span></button>
-      <button class="tab" data-view="classes"><span class="t-full">계열 학습</span><span class="t-short">계열</span></button>
+      <button class="tab active" data-view="home"><span class="t-full">홈</span><span class="t-short">홈</span></button>
+      <button class="tab" data-view="learn"><span class="t-full">학습</span><span class="t-short">학습</span></button>
       <button class="tab" data-view="review"><span class="t-full">복습</span><span class="t-short">복습</span> <span class="badge" id="dueBadge">0</span></button>
+      <button class="tab" data-view="quiz"><span class="t-full">퀴즈</span><span class="t-short">퀴즈</span></button>
       <button class="tab" data-view="stems"><span class="t-full">어간 사전</span><span class="t-short">어간</span></button>
-      <button class="tab" data-view="quiz"><span class="t-full">인터리빙 퀴즈</span><span class="t-short">퀴즈</span></button>
     </nav>
   </header>
 
   <main id="app">
-    <!-- 대시보드 -->
-    <section class="view active" id="view-dashboard">
-      <!-- 첫 진입 시작 안내 + CTA (renderDashboard가 채움) -->
-      <div id="heroCta"></div>
-      <div class="stat-grid" id="statGrid"></div>
-      <div class="panel" id="howtoPanel">
-        <h3>이렇게 시작하세요</h3>
-        <ol class="steps">
-          <li><b>① 계열 학습</b> — 한 계열을 골라 <b>“이 계열 학습하기”</b>로 약을 하나씩 넘기며 읽어요. 대표약(프로토타입)을 먼저, 나머지는 차이점만.</li>
-          <li><b>② 랜덤 퀴즈</b> — 익힌 내용을 여러 계열 섞어 출제하는 퀴즈로 점검해요(인터리빙).</li>
-          <li><b>③ 복습</b> — 헷갈리는 약은 <b>복습 탭</b>에서 간격반복으로 떠올리며 오래 기억해요.</li>
-        </ol>
-        <p class="muted small">💡 막막하면 위 <b>“📖 계열별 학습 시작”</b> 버튼부터 누르세요.</p>
-      </div>
-      <div class="panel">
-        <div class="panel-head">
-          <h3>카테고리별 진행률</h3>
-        </div>
-        <div id="categoryProgress"></div>
-      </div>
+    <!-- 홈 -->
+    <section class="view active" id="view-home">
+      <div id="homeArea"></div>
     </section>
 
-    <!-- 계열 학습 -->
-    <section class="view" id="view-classes">
+    <!-- 학습 (커리큘럼) -->
+    <section class="view" id="view-learn">
       <div class="view-head">
-        <h2>계열 학습 <span class="muted small">청킹 + 프로토타입</span></h2>
-        <p class="muted">계열별로 대표약(프로토타입)을 먼저 익히고, 나머지는 차이점만 학습하세요.</p>
+        <h2>학습 <span class="muted small">단원 · 레슨</span></h2>
+        <p class="muted">카테고리(단원)를 펼쳐 계열(레슨)을 하나씩 마스터하세요.</p>
       </div>
-      <div class="filter-row" id="categoryFilter"></div>
-      <div id="classList" class="class-list"></div>
+      <div id="curriculum"></div>
     </section>
 
-    <!-- 복습 (플래시카드 + SRS) -->
+    <!-- 복습 (SRS) -->
     <section class="view" id="view-review">
       <div class="view-head">
         <h2>복습 <span class="muted small">간격반복 + 인출연습</span></h2>
-        <p class="muted">먼저 답을 떠올린 뒤 카드를 뒤집고, 얼마나 잘 기억했는지 평가하세요.</p>
+        <p class="muted">먼저 답을 떠올린 뒤 카드를 탭해 확인하고, 기억한 정도를 평가하세요.</p>
       </div>
       <div id="reviewArea"></div>
+    </section>
+
+    <!-- 퀴즈 -->
+    <section class="view" id="view-quiz">
+      <div class="view-head">
+        <h2>랜덤 퀴즈 <span class="muted small">인터리빙 · 변별력</span></h2>
+        <p class="muted">여러 계열을 섞어 출제합니다. 헷갈리는 계열을 구분하는 힘을 기릅니다.</p>
+      </div>
+      <div id="quizArea"></div>
     </section>
 
     <!-- 어간 사전 -->
     <section class="view" id="view-stems">
       <div class="view-head">
         <h2>어간 사전 <span class="muted small">내장 니모닉</span></h2>
-        <p class="muted">어간 ~30개만 외우면 수백 개 약의 계열을 추론할 수 있습니다.</p>
+        <p class="muted">어간만 외우면 수백 개 약의 계열을 추론할 수 있습니다.</p>
       </div>
       <div class="stem-grid" id="stemGrid"></div>
     </section>
-
-    <!-- 인터리빙 퀴즈 -->
-    <section class="view" id="view-quiz">
-      <div class="view-head">
-        <h2>인터리빙 퀴즈 <span class="muted small">변별력 강화</span></h2>
-        <p class="muted">여러 계열을 섞어 출제합니다. 헷갈리는 계열을 구분하는 힘을 기릅니다.</p>
-      </div>
-      <div id="quizArea"></div>
-    </section>
   </main>
 
-  <!-- 학습 모드 오버레이 (계열별 정독) -->
+  <!-- 레슨 오버레이 (정독 학습 → 연습문제 → 결과) -->
   <div id="studyOverlay" class="study-overlay" hidden>
     <div class="study-inner" id="studyInner"></div>
   </div>
@@ -110,13 +92,11 @@
   <script src="data/drugs.js"></script>
   <script src="data/stems.js"></script>
   <script src="js/srs.js"></script>
+  <script src="js/progress.js"></script>
   <script src="js/app.js"></script>
   <script>
-    // PWA 서비스워커 등록 (오프라인 지원)
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
     }
   </script>
 </body>
