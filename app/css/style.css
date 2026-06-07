@@ -518,3 +518,48 @@ main { max-width: 1040px; margin: 0 auto; padding: 26px 22px 60px; }
 .wl-title { font-size: 13px; font-weight: 700; color: var(--bad); margin-bottom: 6px; }
 .wl-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
 .wl-row:last-child { border-bottom: none; }
+
+/* ============================================================
+ * 쏙쏙 (자동 흘려보기)
+ * ============================================================ */
+.flow-scopes { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; -webkit-overflow-scrolling: touch; }
+.flow-scopes::-webkit-scrollbar { display: none; }
+.flow-scopes .chip { flex-shrink: 0; }
+
+.flow-stage { min-height: 360px; }
+.flow-card {
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border); border-top: 3px solid var(--cat, var(--primary));
+  border-radius: 20px; padding: 22px 22px 18px; box-shadow: var(--shadow);
+  animation: flowIn .45s ease both; cursor: pointer; min-height: 360px;
+}
+@keyframes flowIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+.flow-timer { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: transparent; }
+.flow-timer > span { display: block; height: 100%; width: 0; background: var(--cat, var(--primary)); animation-name: flowtimer; animation-timing-function: linear; animation-fill-mode: forwards; }
+@keyframes flowtimer { from { width: 0; } to { width: 100%; } }
+.flow-top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.flow-cat { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 999px; border: 1px solid; }
+.flow-stem { margin-left: auto; font-family: ui-monospace, monospace; font-size: 14px; color: var(--accent); }
+.flow-name { font-size: 30px; font-weight: 900; letter-spacing: -.6px; line-height: 1.25; }
+.flow-name .en { display: block; font-size: 15px; color: var(--muted); font-weight: 400; margin-top: 5px; }
+.flow-klass { font-size: 15px; font-weight: 600; color: var(--cat, var(--primary)); margin: 12px 0 16px; }
+.flow-facts { display: grid; gap: 10px; font-size: 16px; line-height: 1.5; }
+.flow-facts > div { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: baseline; }
+.flow-facts .k { font-size: 12px; font-weight: 700; color: var(--muted); padding-top: 2px; }
+.flow-facts .warn .k { color: var(--bad); }
+.flow-count { text-align: center; color: var(--muted); font-size: 12px; margin-top: 18px; }
+
+.flow-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px; }
+.fbtn {
+  min-width: 56px; height: 48px; padding: 0 14px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  font-family: inherit; font-size: 16px; cursor: pointer; transition: transform .08s, background .15s;
+}
+.fbtn:active { transform: scale(.95); }
+.fbtn.play { background: var(--primary); border-color: var(--primary); color: #fff; font-size: 18px; min-width: 64px; }
+
+@media (max-width: 640px) {
+  .flow-name { font-size: 26px; }
+  .flow-facts { font-size: 15px; }
+}

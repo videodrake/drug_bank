@@ -121,12 +121,14 @@
     const btn = e.target.closest('.tab'); if (!btn) return; showView(btn.dataset.view);
   });
   function showView(name) {
+    stopFlow();
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
     if (name === 'home') renderHome();
     if (name === 'learn') renderCurriculum();
     if (name === 'review') startReview();
     if (name === 'quiz') startQuiz();
+    if (name === 'flow') startFlow();
     if (name === 'stems') renderStems();
     window.scrollTo(0, 0);
   }
@@ -463,6 +465,96 @@
       done++; qIdx++; renderCard(); updateBadges();
     };
   }
+
+  /* ---------- 쏙쏙 (자동 흘려보기) ---------- */
+  const CATCOLORS = ['#5b8def', '#2dd4bf', '#34d399', '#fbbf24', '#f87171', '#c084fc', '#f0b429', '#38bdf8', '#fb923c', '#4ade80', '#e879f9', '#22d3ee'];
+  const catColor = cat => CATCOLORS[categories().indexOf(cat) % CATCOLORS.length];
+  const SPEEDS = [{ label: '느리게', ms: 6000 }, { label: '보통', ms: 4000 }, { label: '빠르게', ms: 2500 }];
+  let F = { pool: [], idx: 0, playing: true, speedI: 1, scope: '전체', timer: null };
+
+  function flowPoolFor(scope) {
+    if (scope === '복습 대기') {
+      const due = allIds().filter(id => SRS.isDue(id));
+      return (due.length ? due : allIds());
+    }
+    if (scope === '전체') return allIds();
+    return DRUGS.filter(d => d.category === scope).map(d => d.id);
+  }
+  function stopFlow() { if (F.timer) { clearTimeout(F.timer); F.timer = null; } }
+  function startFlow() {
+    F.pool = shuffle(flowPoolFor(F.scope));
+    F.idx = 0; F.playing = true;
+    renderFlowShell();
+    renderFlowCard();
+    scheduleFlow();
+  }
+  function scheduleFlow() {
+    stopFlow();
+    if (!F.playing) return;
+    F.timer = setTimeout(() => { advanceFlow(1); }, SPEEDS[F.speedI].ms);
+  }
+  function advanceFlow(dir) {
+    if (!F.pool.length) return;
+    F.idx = (F.idx + dir + F.pool.length) % F.pool.length;
+    renderFlowCard();
+    scheduleFlow();
+  }
+  function renderFlowShell() {
+    const scopes = ['전체', ...categories(), '복습 대기'];
+    document.getElementById('flowArea').innerHTML = `
+      <div class="flow-scopes" id="flowScopes">
+        ${scopes.map(s => `<button class="chip ${s === F.scope ? 'active' : ''}" data-scope="${esc(s)}">${s}</button>`).join('')}
+      </div>
+      <div class="flow-stage" id="flowStage"></div>
+      <div class="flow-controls">
+        <button class="fbtn" id="flowPrev" aria-label="이전">⏮</button>
+        <button class="fbtn play" id="flowPlay" aria-label="재생/정지">⏸</button>
+        <button class="fbtn" id="flowNext" aria-label="다음">⏭</button>
+        <button class="fbtn" id="flowSpeed">${SPEEDS[F.speedI].label}</button>
+      </div>`;
+    document.getElementById('flowScopes').onclick = e => {
+      const b = e.target.closest('[data-scope]'); if (!b) return;
+      F.scope = b.dataset.scope; startFlow();
+    };
+    document.getElementById('flowPrev').onclick = () => { F.playing && (F.playing = true); advanceFlow(-1); };
+    document.getElementById('flowNext').onclick = () => advanceFlow(1);
+    document.getElementById('flowPlay').onclick = togglePlay;
+    document.getElementById('flowSpeed').onclick = () => { F.speedI = (F.speedI + 1) % SPEEDS.length; document.getElementById('flowSpeed').textContent = SPEEDS[F.speedI].label; scheduleFlow(); };
+  }
+  function togglePlay() {
+    F.playing = !F.playing;
+    document.getElementById('flowPlay').textContent = F.playing ? '⏸' : '▶';
+    if (F.playing) scheduleFlow(); else stopFlow();
+    const bar = document.querySelector('.flow-timer > span');
+    if (bar && !F.playing) { bar.style.animation = 'none'; }
+    else if (bar && F.playing) renderFlowCard();
+  }
+  function renderFlowCard() {
+    const stage = document.getElementById('flowStage');
+    if (!stage) return;
+    if (!F.pool.length) { stage.innerHTML = `<div class="empty"><div class="big">🌱</div>표시할 약물이 없습니다.</div>`; return; }
+    const d = byId(F.pool[F.idx]);
+    const col = catColor(d.category);
+    const dur = F.playing ? SPEEDS[F.speedI].ms : 0;
+    stage.innerHTML = `
+      <div class="flow-card" id="flowCard" style="--cat:${col}">
+        <div class="flow-timer"><span style="${dur ? `animation-duration:${dur}ms` : 'width:0'}"></span></div>
+        <div class="flow-top">
+          <span class="flow-cat" style="background:${col}22;color:${col};border-color:${col}55">${d.category}</span>
+          ${d.stem ? `<span class="flow-stem">${d.stem}</span>` : ''}
+        </div>
+        <div class="flow-name">${d.generic}<span class="en">${d.genericEn}${d.brand ? ' · ' + d.brand : ''}</span></div>
+        <div class="flow-klass">${d.klass}${d.isPrototype ? ' <span class="proto-flag">대표</span>' : ''}</div>
+        <div class="flow-facts">
+          <div><span class="k">기전</span>${oneLine(d.moa)}</div>
+          <div><span class="k">적응증</span>${oneLine(d.indication)}</div>
+          <div class="warn"><span class="k">주의</span>${oneLine(d.contraindication)}</div>
+        </div>
+        <div class="flow-count">${F.idx + 1} / ${F.pool.length} · 탭하면 일시정지</div>
+      </div>`;
+    document.getElementById('flowCard').onclick = togglePlay;
+  }
+  function oneLine(s) { const t = String(s).split(/[,(·]/)[0].trim(); return t.length > 42 ? t.slice(0, 42) + '…' : t; }
 
   /* ---------- 어간 사전 ---------- */
   function renderStems() {
