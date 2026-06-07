@@ -432,3 +432,56 @@ main { max-width: 1040px; margin: 0 auto; padding: 26px 22px 60px; }
   .home-cta .cta-lesson { font-size: 19px; }
   .unit-title { font-size: 15px; }
 }
+
+/* ============================================================
+ * UI/UX 폴리시 — 터치 반응 · 애니메이션 · 접근성
+ * ============================================================ */
+/* 버튼/선택지 누름 반응 */
+.btn { transition: transform .08s ease, background .15s ease, border-color .15s ease, opacity .15s; }
+.btn:active { transform: translateY(1px) scale(.985); }
+.opt { transition: transform .08s ease, border-color .12s, background .12s; }
+.opt:active:not(:disabled) { transform: scale(.99); }
+.lesson:active { transform: scale(.99); }
+.chip:active { transform: scale(.96); }
+
+/* 키보드 포커스 접근성 */
+.btn:focus-visible, .opt:focus-visible, .tab:focus-visible, .lesson:focus-visible, .chip:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* 카드 뒤집을 때 답 영역 부드럽게 등장 */
+.card.flipped .back { animation: revealUp .28s ease both; }
+@keyframes revealUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* 정답/오답 피드백 살짝 강조 */
+.opt.correct { animation: popIn .25s ease; }
+.opt.wrong { animation: shake .3s ease; }
+@keyframes popIn { 0% { transform: scale(.97); } 60% { transform: scale(1.02); } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* 결과 점수 등장 */
+.result-score { animation: scoreIn .4s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes scoreIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+
+/* 마스터 레슨 아이콘 등장 */
+.lesson.mastered .lesson-ic { animation: popIn .3s ease; }
+
+/* 스트릭 불꽃 살짝 */
+.streak .fire { animation: flicker 2.4s ease-in-out infinite; }
+@keyframes flicker { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+/* 모바일 하단 탭: 활성 표시를 상단 액센트 바로 (그림자 대신) */
+@media (max-width: 640px) {
+  .tabs .tab.active { background: transparent; color: var(--primary); position: relative; }
+  .tabs .tab.active::before {
+    content: ''; position: absolute; top: 0; left: 22%; right: 22%; height: 3px;
+    background: var(--primary); border-radius: 0 0 3px 3px;
+  }
+  .tabs .tab { transition: color .15s; }
+}
+
+/* 모션 최소화 선호 존중 */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .view { animation: none; }
+}

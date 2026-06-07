@@ -18,6 +18,38 @@
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const sample = (a, n) => shuffle(a).slice(0, n);
 
+  /* ---------- 레슨 구성 (다종 계열=그 자체, 1종 계열들=단원 내 묶음) ----------
+     레슨: { id, title, cat, drugs[] }  — id는 첫 약물 id 기반(안정적) */
+  const BUNDLE = 5;
+  let _lessons = null;
+  function buildLessons() {
+    if (_lessons) return _lessons;
+    const byCat = {}; const flat = [];
+    categories().forEach(cat => {
+      const lessons = []; let bucket = [];
+      const flush = () => {
+        if (!bucket.length) return;
+        const names = bucket.map(d => d.generic);
+        const title = names.slice(0, 3).join(' · ') + (names.length > 3 ? ` 외 ${names.length - 3}종` : '');
+        lessons.push({ id: 'L:' + bucket[0].id, title: '묶음 · ' + title, cat, drugs: bucket.slice() });
+        bucket = [];
+      };
+      classesInCategory(cat).forEach(k => {
+        const ds = drugsInClass(k);
+        if (ds.length >= 2) { lessons.push({ id: 'L:' + ds[0].id, title: k, cat, drugs: ds }); }
+        else { bucket.push(ds[0]); if (bucket.length >= BUNDLE) flush(); }
+      });
+      flush();
+      byCat[cat] = lessons; lessons.forEach(l => flat.push(l));
+    });
+    _lessons = { byCat, flat, map: Object.fromEntries(flat.map(l => [l.id, l])) };
+    return _lessons;
+  }
+  const lessonsOf = cat => buildLessons().byCat[cat] || [];
+  const allLessons = () => buildLessons().flat;
+  const lessonIds = () => allLessons().map(l => l.id);
+  const lessonById = id => buildLessons().map[id];
+
   /* ---------- 네비게이션 ---------- */
   document.getElementById('tabs').addEventListener('click', e => {
     const btn = e.target.closest('.tab'); if (!btn) return; showView(btn.dataset.view);
@@ -35,24 +67,24 @@
 
   /* ---------- 홈 ---------- */
   function nextLesson() {
-    return allClasses().find(k => Progress.status(k) !== 'mastered') || null;
+    return allLessons().find(l => Progress.status(l.id) !== 'mastered') || null;
   }
   function renderHome() {
-    const ks = allClasses();
-    const sum = Progress.summary(ks);
+    const ids = lessonIds();
+    const sum = Progress.summary(ids);
     const srs = SRS.stats(allIds());
     const learnedToday = Progress.todayLearned(), goal = Progress.goal();
     const goalPct = Math.min(100, Math.round(learnedToday / goal * 100));
     const streak = Progress.streak();
     const next = nextLesson();
     // 마스터/학습한 레슨에 속한 약물 수
-    const coveredDrugs = ks.reduce((acc, k) => acc + (Progress.status(k) !== 'new' ? drugsInClass(k).length : 0), 0);
+    const coveredDrugs = allLessons().reduce((acc, l) => acc + (Progress.status(l.id) !== 'new' ? l.drugs.length : 0), 0);
 
     const continueCard = next
       ? `<div class="home-cta">
            <div class="cta-label">${sum.mastered + sum.studied > 0 ? '이어서 학습' : '여기서 시작하세요'}</div>
-           <div class="cta-lesson">${next}</div>
-           <div class="cta-meta">${classCategory(next)} · ${drugsInClass(next).length}종 · ${statusLabel(Progress.status(next))}</div>
+           <div class="cta-lesson">${next.title}</div>
+           <div class="cta-meta">${next.cat} · ${next.drugs.length}종 · ${statusLabel(Progress.status(next.id))}</div>
            <button class="btn primary full" id="homeContinue">📖 학습 시작</button>
          </div>`
       : `<div class="home-cta done">
@@ -92,17 +124,17 @@
 
     // 단원별 진도 바
     document.getElementById('homeProgress').innerHTML = categories().map(cat => {
-      const cks = classesInCategory(cat);
-      const cs = Progress.summary(cks);
-      const pct = cks.length ? Math.round(cs.mastered / cks.length * 100) : 0;
+      const lids = lessonsOf(cat).map(l => l.id);
+      const cs = Progress.summary(lids);
+      const pct = lids.length ? Math.round(cs.mastered / lids.length * 100) : 0;
       return `<div class="cat-row">
         <div class="name">${cat}</div>
         <div class="bar"><span style="width:${pct}%"></span></div>
-        <div class="pct">${cs.mastered}/${cks.length}</div>
+        <div class="pct">${cs.mastered}/${lids.length}</div>
       </div>`;
     }).join('');
 
-    const c = document.getElementById('homeContinue'); if (c) c.onclick = () => startLesson(next);
+    const c = document.getElementById('homeContinue'); if (c) c.onclick = () => startLesson(next.id);
     const r = document.getElementById('homeReview'); if (r) r.onclick = () => showView('review');
     document.getElementById('goLearn').onclick = () => showView('learn');
     updateBadges();
@@ -112,46 +144,45 @@
   /* ---------- 학습 (커리큘럼) ---------- */
   function renderCurriculum() {
     const wrap = document.getElementById('curriculum');
-    wrap.innerHTML = categories().map(cat => {
-      const cks = classesInCategory(cat);
-      const cs = Progress.summary(cks);
-      const lessons = cks.map(k => {
-        const drugs = drugsInClass(k);
-        const proto = drugs.find(d => d.isPrototype) || drugs[0];
-        const st = Progress.status(k);
-        const icon = st === 'mastered' ? '✓' : st === 'studied' ? '◐' : '○';
-        return `<button class="lesson ${st}" data-lesson="${esc(k)}">
+    wrap.innerHTML = categories().map((cat, ci) => {
+      const lessons = lessonsOf(cat);
+      const cs = Progress.summary(lessons.map(l => l.id));
+      const rows = lessons.map((l, i) => {
+        const proto = l.drugs.find(d => d.isPrototype) || l.drugs[0];
+        const st = Progress.status(l.id);
+        const best = Progress.lesson(l.id).quizBest;
+        const icon = st === 'mastered' ? '✓' : st === 'studied' ? '◐' : (i + 1);
+        return `<button class="lesson ${st}" data-lesson="${esc(l.id)}">
             <span class="lesson-ic">${icon}</span>
             <span class="lesson-main">
-              <span class="lesson-name">${k}</span>
-              <span class="lesson-sub">${drugs.length}종 · 대표 ${proto.generic}${Progress.lesson(k).quizBest ? ' · 최고 ' + Progress.lesson(k).quizBest + '%' : ''}</span>
+              <span class="lesson-name">${l.title}</span>
+              <span class="lesson-sub">${l.drugs.length}종${l.title.startsWith('묶음') ? '' : ' · 대표 ' + proto.generic}${best ? ' · 최고 ' + best + '%' : ''}</span>
             </span>
             <span class="lesson-go">▸</span>
           </button>`;
       }).join('');
-      const pct = cks.length ? Math.round(cs.mastered / cks.length * 100) : 0;
-      return `<div class="unit">
+      const pct = lessons.length ? Math.round(cs.mastered / lessons.length * 100) : 0;
+      const opened = ci === 0 ? ' open' : '';
+      return `<div class="unit${opened}">
         <div class="unit-head" data-unit>
           <div class="unit-title">${cat}</div>
-          <div class="unit-prog"><div class="bar"><span style="width:${pct}%"></span></div><span class="pct">${cs.mastered}/${cks.length}</span></div>
+          <div class="unit-prog"><div class="bar"><span style="width:${pct}%"></span></div><span class="pct">${cs.mastered}/${lessons.length}</span></div>
           <span class="caret">▾</span>
         </div>
-        <div class="unit-body">${lessons}</div>
+        <div class="unit-body">${rows}</div>
       </div>`;
     }).join('');
 
     wrap.querySelectorAll('.unit-head').forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));
     wrap.querySelectorAll('[data-lesson]').forEach(b => b.onclick = () => startLesson(b.dataset.lesson));
-    // 첫 단원은 펼쳐두기
-    const first = wrap.querySelector('.unit'); if (first) first.classList.add('open');
   }
 
   /* ---------- 레슨 흐름 (학습 → 연습 → 결과) ---------- */
-  let L = null; // { klass, drugs, phase, sIdx, q, qIdx, correct, answered }
-  function startLesson(klass) {
-    const drugs = drugsInClass(klass);
-    if (!drugs.length) return;
-    L = { klass, drugs, phase: 'study', sIdx: 0, seen: new Set(), q: [], qIdx: 0, correct: 0, answered: false };
+  let L = null; // { id, title, drugs, phase, sIdx, q, qIdx, correct, answered }
+  function startLesson(id) {
+    const lesson = lessonById(id);
+    if (!lesson || !lesson.drugs.length) return;
+    L = { id, title: lesson.title, drugs: lesson.drugs, phase: 'study', sIdx: 0, seen: new Set(), q: [], qIdx: 0, correct: 0, answered: false };
     document.getElementById('studyOverlay').hidden = false;
     document.body.style.overflow = 'hidden';
     renderLesson();
@@ -182,7 +213,7 @@
     const pct = (L.sIdx + 1) / L.drugs.length * 100;
     if (!L.seen.has(d.id)) { L.seen.add(d.id); Progress.addLearned(1); }
     inner.innerHTML = `
-      ${lessonBar(L.klass)}
+      ${lessonBar(L.title)}
       <div class="phase-tag">1단계 · 정독 학습 &nbsp;|&nbsp; ${L.sIdx + 1} / ${L.drugs.length}</div>
       <div class="study-prog"><span style="width:${pct}%"></span></div>
       <div class="study-scroll">
@@ -209,7 +240,7 @@
     document.getElementById('lessonClose').onclick = closeLesson;
     document.getElementById('sPrev').onclick = () => { if (L.sIdx > 0) { L.sIdx--; renderLesson(); } };
     document.getElementById('sNext').onclick = () => {
-      if (last) { Progress.markStudied(L.klass); buildPractice(); L.phase = 'practice'; L.qIdx = 0; L.correct = 0; }
+      if (last) { Progress.markStudied(L.id); buildPractice(); L.phase = 'practice'; L.qIdx = 0; L.correct = 0; }
       else L.sIdx++;
       renderLesson();
     };
@@ -237,7 +268,7 @@
     const inner = document.getElementById('studyInner');
     const item = L.q[L.qIdx];
     inner.innerHTML = `
-      ${lessonBar(L.klass + ' · 연습')}
+      ${lessonBar(L.title + ` · 연습`)}
       <div class="phase-tag">2단계 · 연습문제 &nbsp;|&nbsp; ${L.qIdx + 1} / ${L.q.length} &nbsp;|&nbsp; 맞힘 ${L.correct}</div>
       <div class="study-prog"><span style="width:${(L.qIdx) / L.q.length * 100}%"></span></div>
       <div class="study-scroll">
@@ -274,15 +305,15 @@
   function renderResultPhase() {
     const inner = document.getElementById('studyInner');
     const pct = Math.round(L.correct / L.q.length * 100);
-    Progress.recordQuiz(L.klass, pct);
-    const mastered = Progress.status(L.klass) === 'mastered';
+    Progress.recordQuiz(L.id, pct);
+    const mastered = Progress.status(L.id) === `mastered`;
     inner.innerHTML = `
-      ${lessonBar(L.klass + ' · 결과')}
+      ${lessonBar(L.title + ` · 결과`)}
       <div class="result">
         <div class="big">${mastered ? '🎉' : pct >= PASS ? '🎉' : '💪'}</div>
         <div class="result-score ${pct >= PASS ? 'pass' : 'fail'}">${pct}%</div>
         <div class="result-sub">${L.correct} / ${L.q.length} 정답</div>
-        <h3>${mastered ? `${L.klass} 마스터!` : pct >= PASS ? '통과!' : '조금만 더!'}</h3>
+        <h3>${mastered ? `${L.title} 마스터!` : pct >= PASS ? '통과!' : '조금만 더!'}</h3>
         <p class="muted">${pct >= PASS ? '잘했어요. 복습 탭에서 간격반복으로 오래 기억하세요.' : `${PASS}% 이상이면 마스터예요. 다시 학습하거나 한 번 더 풀어보세요.`}</p>
         <div class="hero-btns" style="justify-content:center;margin-top:18px">
           ${pct >= PASS
