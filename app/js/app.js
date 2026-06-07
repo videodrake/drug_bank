@@ -29,6 +29,54 @@
   /* ---------- 대시보드 ---------- */
   function renderDashboard() {
     const s = SRS.stats(allIds());
+
+    // 첫 진입 안내 + 시작 CTA
+    const todayCount = Math.min(s.dueCount, 9999) + Math.min(s.newCount, NEW_PER_DAY);
+    const firstTime = s.learned === 0 && s.dueCount === 0;
+    let heroHTML;
+    if (firstTime) {
+      heroHTML = `
+        <div class="hero">
+          <div class="hero-tag">👋 처음 오셨네요</div>
+          <h2 class="hero-title">약물 ${s.total}종, 외우지 말고 꺼내며 익혀요</h2>
+          <p class="hero-sub">계열로 묶고(청킹) · 매일 조금씩 간격을 두고 복습(간격반복)하는 방식입니다.<br>아래 버튼만 누르면 바로 시작돼요.</p>
+          <div class="hero-btns">
+            <button class="btn primary" id="heroStart">▶ 오늘 학습 시작 (${todayCount}장)</button>
+            <button class="btn ghost" id="heroBrowse">계열 먼저 둘러보기</button>
+          </div>
+        </div>`;
+    } else if (todayCount > 0) {
+      heroHTML = `
+        <div class="hero">
+          <div class="hero-tag">오늘의 학습</div>
+          <h2 class="hero-title">복습할 카드 ${todayCount}장이 준비됐어요</h2>
+          <p class="hero-sub">먼저 떠올리고 → 탭해서 확인 → 기억한 만큼 평가하면 됩니다.</p>
+          <div class="hero-btns">
+            <button class="btn primary" id="heroStart">▶ 오늘 학습 시작 (${todayCount}장)</button>
+            <button class="btn ghost" id="heroBrowse">계열 학습 보기</button>
+          </div>
+        </div>`;
+    } else {
+      heroHTML = `
+        <div class="hero">
+          <div class="hero-tag">🎉 오늘 할 복습 완료</div>
+          <h2 class="hero-title">잘하고 있어요! 학습 완료 ${s.learned}/${s.total}종</h2>
+          <p class="hero-sub">오늘 예정된 복습을 모두 끝냈습니다. 새 계열을 둘러보거나 퀴즈로 점검해 보세요.</p>
+          <div class="hero-btns">
+            <button class="btn primary" id="heroBrowse">계열 학습 둘러보기</button>
+            <button class="btn ghost" id="heroQuiz">인터리빙 퀴즈</button>
+          </div>
+        </div>`;
+    }
+    document.getElementById('heroCta').innerHTML = heroHTML;
+    const bind = (id, view) => { const el = document.getElementById(id); if (el) el.onclick = () => showView(view); };
+    bind('heroStart', 'review');
+    bind('heroBrowse', 'classes');
+    bind('heroQuiz', 'quiz');
+    // 처음 사용자에겐 사용법 패널을 강조, 익숙해지면 접어둠
+    const howto = document.getElementById('howtoPanel');
+    if (howto) howto.style.display = firstTime ? '' : 'none';
+
     document.getElementById('statGrid').innerHTML = `
       <div class="stat"><div class="num">${s.total}</div><div class="label">전체 약물</div></div>
       <div class="stat due"><div class="num">${s.dueCount}</div><div class="label">오늘 복습 대기</div></div>
@@ -125,11 +173,20 @@
   function renderCard() {
     const area = document.getElementById('reviewArea');
     if (qIdx >= queue.length) {
+      const msg = done > 0
+        ? `${done}장을 학습했습니다. 간격반복 큐가 다음 복습일을 자동 배치했습니다.`
+        : `지금은 복습할 카드가 없습니다. 계열 학습에서 새 약물을 둘러보세요.`;
       area.innerHTML = `<div class="empty">
         <div class="big">🎉</div>
-        <h3>오늘 복습 완료!</h3>
-        <p class="muted">${done}장을 학습했습니다. 간격반복 큐가 다음 복습일을 자동 배치했습니다.</p>
+        <h3>${done > 0 ? '오늘 복습 완료!' : '복습 대기 없음'}</h3>
+        <p class="muted">${msg}</p>
+        <div class="hero-btns" style="justify-content:center;margin-top:18px">
+          <button class="btn primary" id="doneClasses">계열 학습 보기</button>
+          <button class="btn ghost" id="doneQuiz">퀴즈로 점검</button>
+        </div>
       </div>`;
+      const c = document.getElementById('doneClasses'); if (c) c.onclick = () => showView('classes');
+      const q = document.getElementById('doneQuiz'); if (q) q.onclick = () => showView('quiz');
       updateBadges();
       return;
     }

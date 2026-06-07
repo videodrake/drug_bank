@@ -1,5 +1,5 @@
 /* 서비스워커 — 앱 셸 캐시 (오프라인 학습 지원) */
-const CACHE = 'drug-study-v1';
+const CACHE = 'drug-study-v2';
 const ASSETS = [
   '.',
   'index.html',

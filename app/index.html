@@ -39,20 +39,17 @@
   <main id="app">
     <!-- 대시보드 -->
     <section class="view active" id="view-dashboard">
-      <div class="view-head">
-        <h2>오늘의 학습</h2>
-        <p class="muted">간격반복 큐에서 복습할 약물과 진행 현황입니다.</p>
-      </div>
+      <!-- 첫 진입 시작 안내 + CTA (renderDashboard가 채움) -->
+      <div id="heroCta"></div>
       <div class="stat-grid" id="statGrid"></div>
-      <div class="panel">
-        <h3>학습법 적용 현황</h3>
-        <ul class="method-list">
-          <li><b>계열 청킹</b> · 약을 계열·기전(MOA)으로 묶고 프로토타입 약물 중심으로 학습</li>
-          <li><b>간격반복</b> · 복습 큐가 망각곡선에 맞춰 오늘 볼 카드를 자동 배치</li>
-          <li><b>인출연습</b> · 카드를 뒤집기 전 먼저 답을 떠올리고 난이도를 평가</li>
-          <li><b>어간 학습</b> · 약물명 어간으로 계열을 추론</li>
-          <li><b>인터리빙</b> · 여러 계열을 섞어 변별력 강화 퀴즈</li>
-        </ul>
+      <div class="panel" id="howtoPanel">
+        <h3>이렇게 학습하세요</h3>
+        <ol class="steps">
+          <li><b>복습 탭</b>에서 카드를 봅니다. 약 이름을 보고 <b>먼저 머릿속으로 떠올린 뒤</b> 탭해서 답을 확인하세요.</li>
+          <li>기억한 정도에 따라 <b>Again·Hard·Good·Easy</b>를 누르면, 다음 복습 날짜가 자동으로 잡힙니다(간격반복).</li>
+          <li>하루 20장이면 충분합니다. 익숙해지면 <b>인터리빙 퀴즈</b>로 점검하세요.</li>
+        </ol>
+        <p class="muted small">💡 어디서부터인지 모를 땐 위 <b>“오늘 학습 시작”</b> 버튼만 누르면 됩니다.</p>
       </div>
       <div class="panel">
         <div class="panel-head">
