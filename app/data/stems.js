@@ -26,7 +26,8 @@ const STEMS = [
   { stem: '-cycline',  klass: '테트라사이클린계',               ex: 'doxycycline, minocycline, tetracycline' },
   { stem: '-conazole', klass: '항진균제 (아졸계)',              ex: 'fluconazole, ketoconazole, itraconazole' },
   { stem: '-vir',      klass: '항바이러스제',                   ex: 'acyclovir, oseltamivir, ritonavir' },
-  { stem: '-mycin/-micin', klass: '미생물 유래 항생제',          ex: 'erythromycin, gentamicin, vancomycin', warn: true, note: '단일 계열 아님 — 매크로라이드·아미노글리코사이드·글리코펩타이드 혼재' },
+  { stem: '-thromycin',klass: '매크로라이드',                   ex: 'erythromycin, azithromycin, clarithromycin' },
+  { stem: '-mycin/-micin', klass: '미생물 유래 항생제',          ex: 'gentamicin, vancomycin, tobramycin', warn: true, note: '단일 계열 아님 — 아미노글리코사이드·글리코펩타이드 등 혼재 (매크로라이드는 -thromycin)' },
   // 신경·정신·통증
   { stem: '-azepam',   klass: '벤조디아제핀',                   ex: 'diazepam, lorazepam, clonazepam' },
   { stem: '-azolam',   klass: '벤조디아제핀',                   ex: 'alprazolam, midazolam, triazolam' },
@@ -36,6 +37,7 @@ const STEMS = [
   { stem: '-terol',    klass: 'β2 작용제 (기관지확장)',         ex: 'salbutamol, salmeterol, formoterol' },
   { stem: '-afil',     klass: 'PDE5 억제제',                    ex: 'sildenafil, tadalafil, vardenafil' },
   { stem: '-dronate',  klass: '비스포스포네이트',               ex: 'alendronate, risedronate, ibandronate' },
+  { stem: '-steride',  klass: '5α-환원효소 억제제',             ex: 'finasteride, dutasteride' },
   { stem: '-iramine',  klass: '항히스타민 (1세대)',             ex: 'chlorpheniramine, brompheniramine' },
   { stem: '-lamide',   klass: '탄산탈수효소 억제제',            ex: 'acetazolamide, dorzolamide' },
   // 안과·소화기
