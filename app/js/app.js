@@ -38,11 +38,11 @@
       heroHTML = `
         <div class="hero">
           <div class="hero-tag">👋 처음 오셨네요</div>
-          <h2 class="hero-title">약물 ${s.total}종, 외우지 말고 꺼내며 익혀요</h2>
-          <p class="hero-sub">계열로 묶고(청킹) · 매일 조금씩 간격을 두고 복습(간격반복)하는 방식입니다.<br>아래 버튼만 누르면 바로 시작돼요.</p>
+          <h2 class="hero-title">먼저 계열별로 쭉 익히고, 퀴즈로 점검해요</h2>
+          <p class="hero-sub">① <b>계열 학습</b>에서 한 묶음씩 정독 → ② <b>랜덤 퀴즈</b>로 확인 → ③ <b>복습</b>으로 오래 기억.<br>처음이라면 아래 버튼으로 시작하세요.</p>
           <div class="hero-btns">
-            <button class="btn primary" id="heroStart">▶ 오늘 학습 시작 (${todayCount}장)</button>
-            <button class="btn ghost" id="heroBrowse">계열 먼저 둘러보기</button>
+            <button class="btn primary" id="heroBrowse">📖 계열별 학습 시작</button>
+            <button class="btn ghost" id="heroQuiz">📝 랜덤 퀴즈 먼저 보기</button>
           </div>
         </div>`;
     } else if (todayCount > 0) {
@@ -133,6 +133,10 @@
           <span class="caret">▸</span>
         </div>
         <div class="class-body">
+          <div class="class-actions">
+            <button class="btn sm primary" data-study="${esc(klass)}">📖 이 계열 학습하기</button>
+            <span class="muted small">대표약 ${proto.generic} 먼저 → 나머지는 차이점만</span>
+          </div>
           <div class="moa-line"><b>MOA</b> · ${proto.moa}</div>
           ${rows}
         </div>
@@ -142,9 +146,77 @@
     list.querySelectorAll('.class-card .head').forEach(h => {
       h.onclick = () => h.parentElement.classList.toggle('open');
     });
+    list.querySelectorAll('[data-study]').forEach(b => {
+      b.onclick = (e) => { e.stopPropagation(); startStudy(b.dataset.study); };
+    });
     list.querySelectorAll('.drug-row .dn').forEach(dn => {
       dn.onclick = () => dn.closest('.drug-row').classList.toggle('show');
     });
+  }
+
+  /* ---------- 학습 모드 (계열별 정독 워크스루) ---------- */
+  let studyList = [], studyIdx = 0, studyKlass = '';
+  function startStudy(klass) {
+    studyList = DRUGS.filter(d => d.klass === klass);
+    if (!studyList.length) return;
+    studyIdx = 0; studyKlass = klass;
+    document.getElementById('studyOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    renderStudy();
+  }
+  function closeStudy() {
+    document.getElementById('studyOverlay').hidden = true;
+    document.body.style.overflow = '';
+  }
+  function renderStudy() {
+    const inner = document.getElementById('studyInner');
+    if (studyIdx >= studyList.length) {
+      inner.innerHTML = `<div class="study-done">
+        <div class="big">✅</div>
+        <h3>${studyKlass} 학습 완료!</h3>
+        <p class="muted">${studyList.length}종을 훑었습니다. 이제 랜덤 퀴즈로 점검하거나, 복습 탭에서 반복하세요.</p>
+        <div class="hero-btns" style="justify-content:center;margin-top:18px">
+          <button class="btn primary" id="studyToQuiz">📝 랜덤 퀴즈 풀기</button>
+          <button class="btn ghost" id="studyMore">다른 계열 보기</button>
+        </div>
+      </div>`;
+      document.getElementById('studyToQuiz').onclick = () => { closeStudy(); showView('quiz'); };
+      document.getElementById('studyMore').onclick = () => { closeStudy(); showView('classes'); };
+      return;
+    }
+    const d = studyList[studyIdx];
+    const last = studyIdx === studyList.length - 1;
+    inner.innerHTML = `
+      <div class="study-bar">
+        <span class="study-klass">${studyKlass}</span>
+        <span class="study-count">${studyIdx + 1} / ${studyList.length}</span>
+        <button class="study-x" id="studyClose" aria-label="닫기">✕</button>
+      </div>
+      <div class="study-prog"><span style="width:${(studyIdx + 1) / studyList.length * 100}%"></span></div>
+      <div class="study-scroll">
+        <div class="study-card">
+          <div class="ctop"><span class="ccat">${d.category} · ${d.klass}</span><span class="cstem">${d.stem || ''}</span></div>
+          <div class="study-name">${d.generic}
+            ${d.isPrototype ? '<span class="proto-flag">프로토타입</span>' : ''}
+            <span class="en">${d.genericEn}${d.brand ? ' · ' + d.brand : ''}</span>
+          </div>
+          <div class="study-detail">
+            <div class="row"><span class="k">작용기전</span> ${d.moa}</div>
+            <div class="row"><span class="k">적응증</span> ${d.indication}</div>
+            <div class="row"><span class="k">부작용</span> ${d.sideEffects}</div>
+            <div class="row"><span class="k">금기·주의</span> ${d.contraindication}</div>
+            <div class="row"><span class="k">용법용량</span> ${d.dose}</div>
+            ${d.note ? `<div class="row"><span class="k">메모</span> ${d.note}</div>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="study-nav">
+        <button class="btn ghost" id="studyPrev" ${studyIdx === 0 ? 'disabled' : ''}>← 이전</button>
+        <button class="btn primary" id="studyNext">${last ? '학습 완료 →' : '다음 →'}</button>
+      </div>`;
+    document.getElementById('studyClose').onclick = closeStudy;
+    document.getElementById('studyPrev').onclick = () => { if (studyIdx > 0) { studyIdx--; renderStudy(); } };
+    document.getElementById('studyNext').onclick = () => { studyIdx++; renderStudy(); };
   }
 
   function drugRow(d) {

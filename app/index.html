@@ -43,13 +43,13 @@
       <div id="heroCta"></div>
       <div class="stat-grid" id="statGrid"></div>
       <div class="panel" id="howtoPanel">
-        <h3>이렇게 학습하세요</h3>
+        <h3>이렇게 시작하세요</h3>
         <ol class="steps">
-          <li><b>복습 탭</b>에서 카드를 봅니다. 약 이름을 보고 <b>먼저 머릿속으로 떠올린 뒤</b> 탭해서 답을 확인하세요.</li>
-          <li>기억한 정도에 따라 <b>Again·Hard·Good·Easy</b>를 누르면, 다음 복습 날짜가 자동으로 잡힙니다(간격반복).</li>
-          <li>하루 20장이면 충분합니다. 익숙해지면 <b>인터리빙 퀴즈</b>로 점검하세요.</li>
+          <li><b>① 계열 학습</b> — 한 계열을 골라 <b>“이 계열 학습하기”</b>로 약을 하나씩 넘기며 읽어요. 대표약(프로토타입)을 먼저, 나머지는 차이점만.</li>
+          <li><b>② 랜덤 퀴즈</b> — 익힌 내용을 여러 계열 섞어 출제하는 퀴즈로 점검해요(인터리빙).</li>
+          <li><b>③ 복습</b> — 헷갈리는 약은 <b>복습 탭</b>에서 간격반복으로 떠올리며 오래 기억해요.</li>
         </ol>
-        <p class="muted small">💡 어디서부터인지 모를 땐 위 <b>“오늘 학습 시작”</b> 버튼만 누르면 됩니다.</p>
+        <p class="muted small">💡 막막하면 위 <b>“📖 계열별 학습 시작”</b> 버튼부터 누르세요.</p>
       </div>
       <div class="panel">
         <div class="panel-head">
@@ -96,6 +96,11 @@
       <div id="quizArea"></div>
     </section>
   </main>
+
+  <!-- 학습 모드 오버레이 (계열별 정독) -->
+  <div id="studyOverlay" class="study-overlay" hidden>
+    <div class="study-inner" id="studyInner"></div>
+  </div>
 
   <footer class="footer">
     <span id="footStats"></span>
