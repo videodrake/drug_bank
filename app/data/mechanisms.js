@@ -116,52 +116,74 @@ const MECHANISMS = [
   </svg>`
 },
 {
-  id: 'coag', sys: '혈액', title: '응고 캐스케이드와 항응고제',
-  classes: '와파린 · 헤파린/LMWH · DOAC(-xaban, -gatran)',
-  desc: '응고인자가 연쇄 활성화되어 피브린 그물을 만든다. 항응고제는 각기 다른 지점을 막는다.',
+  id: 'coag', sys: '혈액', title: '응고 캐스케이드 (전체 경로)',
+  classes: '와파린 · 헤파린/LMWH · DOAC(-xaban,-gatran) · 트라넥삼산 · 혈전용해제(tPA)',
+  desc: '내인계·외인계가 공통경로(Xa→트롬빈→피브린)로 모여 혈전을 만들고, 섬유소용해계가 이를 분해한다. 약은 각 지점을 차단(항응고·지혈)하거나 분해를 촉진(혈전용해)한다.',
   points: [
-    '와파린: 비타민K 의존인자(II·VII·IX·X) 합성 차단 — INR 모니터',
-    '헤파린/LMWH: 안티트롬빈 활성화 → Xa·트롬빈 억제',
-    '-xaban: Xa 인자 직접 억제',
-    '다비가트란: 트롬빈(IIa) 직접 억제',
+    '외인계(PT/INR): 조직인자(TF)+VIIa — 와파린 모니터 지표',
+    '내인계(aPTT): XII→XI→IX(+VIII) — 헤파린 모니터 지표',
+    '공통경로: X→Xa(+Va) → 프로트롬빈(II)→트롬빈(IIa) → 피브리노겐→피브린 →(XIIIa) 교차결합 안정화',
+    '안티트롬빈(AT): Xa·IIa를 억제 — 헤파린이 이를 강화(LMWH는 주로 Xa)',
+    '와파린: 비타민K 의존인자 II·VII·IX·X(+단백 C/S) 합성 차단 (VII 반감기 짧아 PT 먼저↑)',
+    'DOAC: -xaban=Xa 직접 억제 / 다비가트란=트롬빈(IIa) 직접 억제',
+    '섬유소용해: 플라스미노겐→(tPA)플라스민→피브린 분해(D-이량체). 혈전용해제(알테플라제) 촉진 ↔ 트라넥삼산 차단(지혈)',
   ],
-  svg: `<svg class="mech-svg" viewBox="0 0 360 280">
-    <rect class="box" x="20" y="8" width="150" height="32" rx="9"/><text x="95" y="29" text-anchor="middle">내인계</text>
-    <rect class="box" x="190" y="8" width="150" height="32" rx="9"/><text x="265" y="29" text-anchor="middle">외인계</text>
-    <line class="flow" x1="95" y1="40" x2="168" y2="66" marker-end="url(#ah)"/>
-    <line class="flow" x1="265" y1="40" x2="192" y2="66" marker-end="url(#ah)"/>
-    <rect class="box tgt" x="135" y="68" width="90" height="34" rx="9"/><text x="180" y="90" text-anchor="middle" font-size="15">Xa 인자</text>
-    <text class="blk" x="116" y="92" text-anchor="middle">✕</text><text class="drug" x="104" y="84" text-anchor="end">-xaban</text><text class="drug2" x="104" y="99" text-anchor="end">아픽사반·리바록사반</text>
-    <text class="drug" x="244" y="82" text-anchor="start">헤파린·에녹사파린</text><text class="lbl" x="244" y="97" text-anchor="start">(AT 경유)</text>
-    <line class="flow" x1="180" y1="102" x2="180" y2="128" marker-end="url(#ah)"/>
-    <rect class="box acc-b" x="130" y="130" width="100" height="34" rx="9"/><text x="180" y="152" text-anchor="middle" font-size="15">트롬빈(IIa)</text>
-    <text class="blk" x="114" y="154" text-anchor="middle">✕</text><text class="drug" x="102" y="146" text-anchor="end">-gatran</text><text class="drug2" x="102" y="161" text-anchor="end">다비가트란</text>
-    <line class="flow" x1="180" y1="164" x2="180" y2="190" marker-end="url(#ah)"/>
-    <rect class="box bad-b" x="130" y="192" width="100" height="32" rx="9"/><text x="180" y="213" text-anchor="middle">피브린(혈전)</text>
-    <rect class="box" x="20" y="240" width="320" height="32" rx="9" style="fill:none;stroke-dasharray:4 3"/>
-    <text class="drug" x="180" y="260" text-anchor="middle">와파린 ✕ II·VII·IX·X 합성 (비타민K 의존)</text>
+  svg: `<svg class="mech-svg" viewBox="0 0 360 492">
+    <rect class="box" x="6" y="6" width="174" height="52" rx="9"/><text x="93" y="27" text-anchor="middle">내인계 (aPTT)</text><text class="lbl" x="93" y="45" text-anchor="middle">XII→XI→IX (+VIII)</text>
+    <rect class="box" x="192" y="6" width="162" height="52" rx="9"/><text x="273" y="27" text-anchor="middle">외인계 (PT/INR)</text><text class="lbl" x="273" y="45" text-anchor="middle">조직인자(TF) + VIIa</text>
+    <line class="flow" x1="93" y1="58" x2="150" y2="86" marker-end="url(#ah)"/>
+    <line class="flow" x1="273" y1="58" x2="210" y2="86" marker-end="url(#ah)"/>
+    <rect class="box tgt" x="108" y="88" width="144" height="50" rx="9"/><text x="180" y="110" text-anchor="middle" font-size="15">공통: X → Xa</text><text class="lbl" x="180" y="128" text-anchor="middle">보조인자 Va · Ca²⁺</text>
+    <text class="blk" x="100" y="116" text-anchor="middle">✕</text><text class="drug" x="92" y="106" text-anchor="end">-xaban</text><text class="drug2" x="92" y="121" text-anchor="end">아픽사반·리바록사반</text>
+    <text class="ok" x="260" y="106" text-anchor="start">헤파린/LMWH</text><text class="lbl" x="260" y="121" text-anchor="start">→ AT 강화</text>
+    <line class="flow" x1="180" y1="138" x2="180" y2="162" marker-end="url(#ah)"/>
+    <rect class="box acc-b" x="112" y="164" width="136" height="48" rx="9"/><text x="180" y="184" text-anchor="middle" font-size="15">트롬빈 (IIa)</text><text class="lbl" x="180" y="202" text-anchor="middle">← 프로트롬빈 (II)</text>
+    <text class="blk" x="102" y="190" text-anchor="middle">✕</text><text class="drug" x="94" y="182" text-anchor="end">-gatran</text><text class="drug2" x="94" y="197" text-anchor="end">다비가트란</text>
+    <text class="lbl" x="256" y="190" text-anchor="start">AT ⊣ IIa</text>
+    <line class="flow" x1="180" y1="212" x2="180" y2="236" marker-end="url(#ah)"/>
+    <rect class="box" x="108" y="238" width="144" height="48" rx="9"/><text x="180" y="258" text-anchor="middle" font-size="15">피브리노겐(I) → 피브린</text><text class="lbl" x="180" y="276" text-anchor="middle">XIIIa: 교차결합</text>
+    <line class="flow" x1="180" y1="286" x2="180" y2="308" marker-end="url(#ah)"/>
+    <rect class="box bad-b" x="118" y="310" width="124" height="32" rx="9"/><text x="180" y="331" text-anchor="middle" font-size="15">안정 혈전</text>
+    <rect class="box" x="6" y="352" width="348" height="44" rx="9" style="fill:none;stroke-dasharray:4 3"/>
+    <text class="drug" x="180" y="370" text-anchor="middle">와파린 ✕ II·VII·IX·X (+단백 C/S) 합성</text><text class="lbl" x="180" y="387" text-anchor="middle">비타민K 의존 · VII 반감기 짧아 PT 먼저 상승</text>
+    <text class="lbl" x="180" y="414" text-anchor="middle">── 섬유소용해 (혈전 분해) ──</text>
+    <rect class="box" x="6" y="420" width="150" height="36" rx="9"/><text x="81" y="442" text-anchor="middle">플라스미노겐</text>
+    <rect class="box" x="204" y="420" width="150" height="36" rx="9"/><text x="279" y="442" text-anchor="middle">플라스민→분해</text>
+    <line class="flow" x1="156" y1="438" x2="204" y2="438" marker-end="url(#ah)"/>
+    <text class="ok" x="180" y="432" text-anchor="middle">tPA·알테플라제 ＋</text>
+    <text class="blk" x="180" y="456" text-anchor="middle">✕</text><text class="drug" x="180" y="474" text-anchor="middle">트라넥삼산 (지혈)</text>
   </svg>`
 },
 {
-  id: 'platelet', sys: '혈액', title: '혈소판 활성화와 항혈소판제',
-  classes: '아스피린 · P2Y12억제제',
-  desc: '혈소판은 여러 경로로 활성화되어 응집한다. 항혈소판제는 활성화 신호를 차단한다.',
+  id: 'platelet', sys: '혈액', title: '혈소판 활성화 (1차 지혈)',
+  classes: '아스피린 · P2Y12억제제(클로피도그렐 등) · GPIIb/IIIa억제제',
+  desc: '혈관이 손상되면 혈소판이 ① 부착 → ② 활성화 → ③ 응집의 3단계로 마개를 만든다(1차 지혈). 항혈소판제는 활성화 신호를 차단한다.',
   points: [
-    '아스피린: COX-1 비가역 억제 → 트롬복산 A2↓',
-    'P2Y12억제제: ADP 수용체 차단',
-    '두 경로 모두 GPIIb/IIIa 활성 → 응집',
-    '스텐트 후 보통 두 약 병용(이중항혈소판요법)',
+    '① 부착: 노출된 콜라겐·vWF에 GPIb로 달라붙음',
+    '② 활성화: 콜라겐·트롬빈(PAR)·TXA2(COX-1)·ADP(P2Y12) 자극 → 과립분비로 ADP·TXA2 증폭(양성 피드백)',
+    '③ 응집: GPIIb/IIIa 활성화 → 피브리노겐이 혈소판끼리 다리 결합',
+    '아스피린: COX-1 비가역 차단 → TXA2↓ / P2Y12억제제: ADP 수용체 차단',
+    'GPIIb/IIIa억제제(압식시맙 등): 최종 응집 차단(정맥, 시술 시)',
+    '혈소판 마개(1차) → 이어서 응고·피브린(2차 지혈)이 안정화',
   ],
-  svg: `<svg class="mech-svg" viewBox="0 0 360 230">
-    <rect class="box acc-b" x="120" y="92" width="120" height="42" rx="11"/><text x="180" y="118" text-anchor="middle" font-size="15">혈소판</text>
-    <rect class="box" x="20" y="10" width="150" height="34" rx="9"/><text x="95" y="32" text-anchor="middle">COX-1 → TXA2</text>
-    <text class="blk" x="95" y="64" text-anchor="middle">✕</text><text class="drug" x="150" y="60" text-anchor="start">아스피린</text>
-    <line class="flow" x1="95" y1="68" x2="140" y2="98" marker-end="url(#ah)"/>
-    <rect class="box" x="190" y="10" width="150" height="34" rx="9"/><text x="265" y="32" text-anchor="middle">ADP → P2Y12</text>
-    <text class="blk" x="265" y="64" text-anchor="middle">✕</text><text class="drug" x="210" y="58" text-anchor="end">P2Y12억제제</text><text class="drug2" x="210" y="73" text-anchor="end">클로피도그렐·티카그렐러</text>
-    <line class="flow" x1="265" y1="68" x2="220" y2="98" marker-end="url(#ah)"/>
-    <line class="flow" x1="180" y1="134" x2="180" y2="160" marker-end="url(#ah)"/>
-    <rect class="box bad-b" x="105" y="162" width="150" height="36" rx="9"/><text x="180" y="185" text-anchor="middle" font-size="15">GPIIb/IIIa → 응집</text>
+  svg: `<svg class="mech-svg" viewBox="0 0 360 384">
+    <rect class="box" x="14" y="6" width="332" height="34" rx="9"/><text x="180" y="28" text-anchor="middle">혈관 손상 → 콜라겐 · vWF 노출</text>
+    <line class="flow" x1="180" y1="40" x2="180" y2="60" marker-end="url(#ah)"/>
+    <rect class="box" x="70" y="62" width="220" height="34" rx="9"/><text x="180" y="84" text-anchor="middle">① 부착 : GPIb – vWF</text>
+    <rect class="box" x="6" y="112" width="150" height="34" rx="9"/><text x="81" y="134" text-anchor="middle">COX-1 → TXA2</text>
+    <text class="blk" x="46" y="166" text-anchor="middle">✕</text><text class="drug" x="64" y="162" text-anchor="start">아스피린</text>
+    <rect class="box" x="204" y="112" width="150" height="34" rx="9"/><text x="279" y="134" text-anchor="middle">ADP → P2Y12</text>
+    <text class="blk" x="316" y="166" text-anchor="middle">✕</text><text class="drug" x="300" y="158" text-anchor="end">P2Y12억제제</text><text class="drug2" x="300" y="172" text-anchor="end">클로피도그렐·티카그렐러</text>
+    <line class="flow" x1="180" y1="96" x2="180" y2="176" marker-end="url(#ah)"/>
+    <line class="flow" x1="81" y1="146" x2="140" y2="178" marker-end="url(#ah)"/>
+    <line class="flow" x1="279" y1="146" x2="220" y2="178" marker-end="url(#ah)"/>
+    <rect class="box acc-b" x="108" y="180" width="144" height="50" rx="9"/><text x="180" y="201" text-anchor="middle" font-size="15">② 활성화</text><text class="lbl" x="180" y="219" text-anchor="middle">과립분비 · TXA2/ADP 증폭</text>
+    <line class="flow" x1="180" y1="230" x2="180" y2="254" marker-end="url(#ah)"/>
+    <rect class="box" x="78" y="256" width="204" height="48" rx="9"/><text x="180" y="276" text-anchor="middle" font-size="15">③ 응집 : GPIIb/IIIa</text><text class="lbl" x="180" y="294" text-anchor="middle">피브리노겐 다리 결합</text>
+    <text class="blk" x="292" y="282" text-anchor="middle">✕</text><text class="drug2" x="300" y="276" text-anchor="start">GPIIb/IIIa</text><text class="drug2" x="300" y="290" text-anchor="start">억제제</text>
+    <line class="flow" x1="180" y1="304" x2="180" y2="326" marker-end="url(#ah)"/>
+    <rect class="box bad-b" x="100" y="328" width="160" height="32" rx="9"/><text x="180" y="349" text-anchor="middle" font-size="15">혈소판 마개 (1차 지혈)</text>
+    <text class="lbl" x="180" y="378" text-anchor="middle">→ 이어서 응고(2차 지혈, 피브린)로 안정화</text>
   </svg>`
 },
 {
