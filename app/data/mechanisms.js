@@ -309,3 +309,83 @@ const MECHANISMS = [
   </svg>`
 },
 ];
+
+/* 기전별 실제 약물 매칭 (한글 + 영문 일반명) — DB 300종 기준 */
+const MECH_DRUGS = {
+  raas: [
+    { role: 'ACE억제제', list: '에날라프릴(Enalapril) · 리시노프릴(Lisinopril) · 라미프릴(Ramipril)' },
+    { role: 'ARB', list: '로사르탄(Losartan) · 발사르탄(Valsartan) · 텔미사르탄(Telmisartan)' },
+    { role: '알도스테론 길항제', list: '스피로노락톤(Spironolactone) · 에플레레논(Eplerenone)' },
+    { role: 'ARNI', list: '사쿠비트릴/발사르탄(Sacubitril/Valsartan)' },
+  ],
+  adrenergic: [
+    { role: '베타차단제(β1)', list: '메토프롤롤(Metoprolol) · 비소프롤롤(Bisoprolol) · 카르베딜롤(Carvedilol) · 아테놀롤(Atenolol) · 프로프라놀롤(Propranolol) · 네비볼롤(Nebivolol)' },
+    { role: 'α1 차단제', list: '독사조신(Doxazosin) · 탐스로신(Tamsulosin) · 알푸조신(Alfuzosin)' },
+    { role: '중추 α2 작용제', list: '클로니딘(Clonidine) · 메틸도파(Methyldopa)' },
+    { role: 'β2 작용제', list: '살부타몰(Salbutamol) · 살메테롤(Salmeterol) · 포르모테롤(Formoterol)' },
+  ],
+  nephron: [
+    { role: '루프 이뇨제', list: '푸로세미드(Furosemide) · 토르세미드(Torsemide)' },
+    { role: '티아지드', list: '하이드로클로로티아지드(Hydrochlorothiazide) · 인다파미드(Indapamide)' },
+    { role: '칼륨보존', list: '스피로노락톤(Spironolactone) · 에플레레논(Eplerenone)' },
+    { role: '탄산탈수효소억제', list: '아세타졸아미드(Acetazolamide)' },
+    { role: 'SGLT2 억제제', list: '다파글리플로진(Dapagliflozin) · 엠파글리플로진(Empagliflozin)' },
+  ],
+  statin: [
+    { role: '스타틴', list: '아토르바스타틴(Atorvastatin) · 로수바스타틴(Rosuvastatin) · 심바스타틴(Simvastatin)' },
+    { role: '흡수 억제(NPC1L1)', list: '에제티미브(Ezetimibe)' },
+    { role: '피브레이트(TG)', list: '페노피브레이트(Fenofibrate)' },
+  ],
+  coag: [
+    { role: '비타민K 길항', list: '와파린(Warfarin)' },
+    { role: '헤파린/LMWH', list: '헤파린(Heparin) · 에녹사파린(Enoxaparin)' },
+    { role: 'Xa 억제(-xaban)', list: '아픽사반(Apixaban) · 리바록사반(Rivaroxaban)' },
+    { role: '트롬빈 억제(-gatran)', list: '다비가트란(Dabigatran)' },
+  ],
+  platelet: [
+    { role: 'COX-1 → TXA2', list: '아스피린(Aspirin)' },
+    { role: 'P2Y12 억제', list: '클로피도그렐(Clopidogrel) · 티카그렐러(Ticagrelor) · 프라수그렐(Prasugrel)' },
+  ],
+  acid: [
+    { role: 'PPI(양성자펌프)', list: '오메프라졸(Omeprazole) · 에스오메프라졸(Esomeprazole) · 판토프라졸(Pantoprazole) · 란소프라졸(Lansoprazole)' },
+    { role: 'H2 차단제', list: '파모티딘(Famotidine)' },
+    { role: '제산제(중화)', list: '알마게이트(Almagate)' },
+  ],
+  diabetes: [
+    { role: '비구아나이드(간)', list: '메트포르민(Metformin)' },
+    { role: '설포닐우레아(췌장)', list: '글리메피리드(Glimepiride) · 글리클라지드(Gliclazide)' },
+    { role: 'DPP-4 억제제', list: '시타글립틴(Sitagliptin) · 리나글립틴(Linagliptin)' },
+    { role: 'GLP-1 작용제', list: '세마글루티드(Semaglutide) · 둘라글루티드(Dulaglutide)' },
+    { role: 'SGLT2 억제제(신장)', list: '다파글리플로진(Dapagliflozin) · 엠파글리플로진(Empagliflozin)' },
+    { role: 'TZD(감수성)', list: '피오글리타존(Pioglitazone)' },
+    { role: 'α-글루코시다제(장)', list: '아카보스(Acarbose)' },
+    { role: '인슐린', list: '글라진(Glargine) · 아스파트(Aspart) · NPH' },
+  ],
+  cox: [
+    { role: '비선택 NSAID', list: '이부프로펜(Ibuprofen) · 나프록센(Naproxen) · 디클로페낙(Diclofenac) · 케토롤락(Ketorolac)' },
+    { role: 'COX-2 선택', list: '세레콕시브(Celecoxib)' },
+    { role: '스테로이드(PLA2)', list: '프레드니솔론(Prednisolone) · 덱사메타손(Dexamethasone)' },
+    { role: '해열진통(중추)', list: '아세트아미노펜(Acetaminophen)' },
+  ],
+  synapse: [
+    { role: 'SSRI', list: '에스시탈로프람(Escitalopram) · 설트랄린(Sertraline) · 플루옥세틴(Fluoxetine) · 파록세틴(Paroxetine) · 시탈로프람(Citalopram)' },
+    { role: 'SNRI', list: '벤라팍신(Venlafaxine) · 둘록세틴(Duloxetine)' },
+    { role: 'TCA', list: '아미트립틸린(Amitriptyline) · 노르트립틸린(Nortriptyline)' },
+    { role: '벤조디아제핀(GABA)', list: '로라제팜(Lorazepam) · 알프라졸람(Alprazolam) · 디아제팜(Diazepam)' },
+  ],
+  antibiotics: [
+    { role: '세포벽 β-락탐', list: '아목시실린(Amoxicillin) · 세팔렉신(Cephalexin) · 세프트리악손(Ceftriaxone)' },
+    { role: '세포벽 글리코펩타이드', list: '반코마이신(Vancomycin)' },
+    { role: '30S 리보솜', list: '겐타마이신(Gentamicin) · 독시사이클린(Doxycycline)' },
+    { role: '50S 리보솜', list: '아지트로마이신(Azithromycin) · 클린다마이신(Clindamycin) · 리네졸리드(Linezolid)' },
+    { role: 'DNA gyrase(퀴놀론)', list: '시프로플록사신(Ciprofloxacin) · 레보플록사신(Levofloxacin)' },
+    { role: '엽산 합성', list: '트리메토프림/설파메톡사졸(TMP/SMX)' },
+  ],
+  airway: [
+    { role: 'SABA(속효 β2)', list: '살부타몰(Salbutamol)' },
+    { role: 'LABA(지속 β2)', list: '살메테롤(Salmeterol) · 포르모테롤(Formoterol)' },
+    { role: 'LAMA(항콜린)', list: '티오트로피움(Tiotropium) · 이프라트로피움(Ipratropium)' },
+    { role: 'ICS(흡입스테로이드)', list: '부데소니드(Budesonide) · 플루티카손(Fluticasone)' },
+    { role: '류코트리엔 억제제', list: '몬테루카스트(Montelukast)' },
+  ],
+};

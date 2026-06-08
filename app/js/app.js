@@ -583,6 +583,7 @@
       const c = e.target.closest('.chip'); if (!c) return; mechSys = c.dataset.sys; renderMechanism();
     };
     const list = mechSys === '전체' ? MECHANISMS : MECHANISMS.filter(m => m.sys === mechSys);
+    const md = typeof MECH_DRUGS !== 'undefined' ? MECH_DRUGS : {};
     document.getElementById('mechList').innerHTML = list.map(m => `
       <div class="mech-card">
         <div class="mech-h">
@@ -590,10 +591,24 @@
           <h3>${m.title}</h3>
         </div>
         <div class="mech-classes">${m.classes}</div>
-        <div class="mech-diagram">${m.svg}</div>
+        <div class="mech-diagram" data-mech="${m.id}"><div class="zoom-hint">🔍 탭하면 크게</div>${m.svg}</div>
         <p class="mech-desc">${m.desc}</p>
         <ul class="mech-points">${m.points.map(p => `<li>${p}</li>`).join('')}</ul>
+        ${(md[m.id] || []).length ? `<div class="mech-drugs"><div class="md-title">이 기전의 약물 (한글 · 일반명)</div>
+          ${md[m.id].map(g => `<div class="md-row"><span class="md-role">${g.role}</span><span class="md-list">${g.list}</span></div>`).join('')}
+        </div>` : ''}
       </div>`).join('');
+    // 다이어그램 탭 → 전체화면 확대
+    document.querySelectorAll('#mechList .mech-diagram').forEach(el => {
+      el.onclick = () => openMechZoom(el.querySelector('svg').outerHTML);
+    });
+  }
+  function openMechZoom(svgHTML) {
+    const wrap = document.createElement('div');
+    wrap.className = 'mech-zoom';
+    wrap.innerHTML = `<button class="mz-close" aria-label="닫기">✕</button><div class="mz-body">${svgHTML}</div><div class="mz-hint">가로로 돌리면 더 큽니다 · 빈 곳을 탭해 닫기</div>`;
+    wrap.onclick = () => wrap.remove();
+    document.body.appendChild(wrap);
   }
 
   /* ---------- 어간 사전 ---------- */

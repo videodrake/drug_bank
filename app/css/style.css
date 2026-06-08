@@ -579,13 +579,35 @@ main { max-width: 1040px; margin: 0 auto; padding: 26px 22px 60px; }
 
 /* SVG 내부 공통 스타일 */
 .mech-svg { width: 100%; height: auto; display: block; font-family: 'Noto Sans KR', sans-serif; }
-.mech-svg text { fill: var(--text); font-size: 12px; }
-.mech-svg .lbl { fill: var(--muted); font-size: 10.5px; }
+.mech-svg text { fill: var(--text); font-size: 14px; font-weight: 500; }
+.mech-svg .lbl { fill: var(--muted); font-size: 12.5px; }
 .mech-svg .box { fill: var(--panel-2); stroke: var(--border); stroke-width: 1; }
 .mech-svg .acc-b { fill: #15324a; stroke: var(--primary); }
 .mech-svg .tgt { fill: #14352b; stroke: var(--good); }
 .mech-svg .bad-b { fill: #3a1f24; stroke: var(--bad); }
 .mech-svg .flow { stroke: #94a3b8; stroke-width: 2; fill: none; }
-.mech-svg .blk { fill: var(--bad); font-size: 17px; font-weight: 900; }
-.mech-svg .drug { fill: var(--bad); font-size: 11px; font-weight: 700; }
+.mech-svg .blk { fill: var(--bad); font-size: 20px; font-weight: 900; }
+.mech-svg .drug { fill: var(--bad); font-size: 13px; font-weight: 700; }
 .mech-svg .acc { fill: var(--accent); }
+
+/* 기전 — 약물 매칭 표 · 확대 보기 */
+.mech-diagram { position: relative; cursor: zoom-in; }
+.zoom-hint { position: absolute; top: 8px; right: 10px; font-size: 11px; color: var(--muted); background: rgba(15,20,32,.7); padding: 3px 8px; border-radius: 999px; pointer-events: none; }
+.mech-drugs { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; }
+.md-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+.md-row { display: grid; grid-template-columns: 124px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
+.md-row:last-child { border-bottom: none; }
+.md-role { color: var(--primary); font-weight: 600; }
+.md-list { color: var(--text); line-height: 1.55; }
+
+/* 전체화면 확대 오버레이 */
+.mech-zoom { position: fixed; inset: 0; z-index: 100; background: rgba(8,12,20,.96); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+.mech-zoom .mz-body { width: 100%; max-width: 900px; }
+.mech-zoom .mz-body svg { width: 100%; height: auto; max-height: 82vh; }
+.mech-zoom .mz-close { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 18px; cursor: pointer; }
+.mech-zoom .mz-hint { margin-top: 14px; font-size: 12px; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .md-row { grid-template-columns: 1fr; gap: 2px; }
+  .md-role { font-size: 12.5px; }
+}
