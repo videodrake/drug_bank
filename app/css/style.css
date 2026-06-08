@@ -611,3 +611,7 @@ main { max-width: 1040px; margin: 0 auto; padding: 26px 22px 60px; }
   .md-row { grid-template-columns: 1fr; gap: 2px; }
   .md-role { font-size: 12.5px; }
 }
+
+/* 기전 SVG 추가 라벨: 보조 약물명(.drug2) · 활성 작용(.ok) */
+.mech-svg .drug2 { fill: #fca5a5; font-size: 11.5px; font-weight: 600; }
+.mech-svg .ok { fill: var(--good); font-size: 13px; font-weight: 700; }
