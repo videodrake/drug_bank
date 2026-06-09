@@ -21,6 +21,10 @@
   // 임상 보강 정보(details.js 오버레이)
   const dEsc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const detailOf = id => (typeof DRUG_DETAILS !== 'undefined' ? DRUG_DETAILS[id] : null);
+  // 계열 공통 기전(있으면 통일된 문구) + 약물별 계열 내 특징
+  const moaOf = d => (typeof CLASS_MOA !== 'undefined' && CLASS_MOA[d.klass]) ? CLASS_MOA[d.klass] : d.moa;
+  const distinctOf = id => (typeof DRUG_DISTINCT !== 'undefined' ? DRUG_DISTINCT[id] : null);
+  const distinctRow = d => { const x = distinctOf(d.id); return x ? `<div class="row distinct"><span class="k">계열 내 특징</span> ${dEsc(x)}</div>` : ''; };
   function detailRows(d) {
     const x = detailOf(d.id); if (!x) return '';
     return `
@@ -312,7 +316,8 @@
             <span class="en">${d.genericEn}${d.brand ? ' · ' + d.brand : ''}</span>
           </div>
           <div class="study-detail">
-            <div class="row"><span class="k">작용기전</span> ${d.moa}</div>
+            <div class="row"><span class="k">작용기전</span> ${moaOf(d)}</div>
+            ${distinctRow(d)}
             <div class="row"><span class="k">적응증</span> ${d.indication}</div>
             <div class="row"><span class="k">부작용</span> ${d.sideEffects}</div>
             <div class="row"><span class="k">금기·주의</span> ${d.contraindication}</div>
@@ -449,7 +454,8 @@
         <div class="ctop"><span class="ccat">${d.klass}</span><span class="cstem">${d.stem || ''}</span></div>
         <div class="front">${d.generic}<span class="en">${d.genericEn}${d.brand ? ' · ' + d.brand : ''}</span></div>
         <div class="back">
-          <div class="row"><span class="k">계열/MOA</span> ${d.moa}</div>
+          <div class="row"><span class="k">계열/MOA</span> ${moaOf(d)}</div>
+          ${distinctRow(d)}
           <div class="row"><span class="k">적응증</span> ${d.indication}</div>
           <div class="row"><span class="k">부작용</span> ${d.sideEffects}</div>
           <div class="row"><span class="k">금기</span> ${d.contraindication}</div>
@@ -561,7 +567,8 @@
         <div class="flow-name">${d.generic}<span class="en">${d.genericEn}${d.brand ? ' · ' + d.brand : ''}</span></div>
         <div class="flow-klass">${d.klass}${d.isPrototype ? ' <span class="proto-flag">대표</span>' : ''}</div>
         <div class="flow-facts">
-          <div><span class="k">기전</span>${oneLine(d.moa)}</div>
+          <div><span class="k">기전</span>${oneLine(moaOf(d))}</div>
+          ${distinctOf(d.id) ? `<div class="ok-fact"><span class="k">특징</span>${dEsc(oneLine(distinctOf(d.id)))}</div>` : ''}
           <div><span class="k">적응증</span>${oneLine(d.indication)}</div>
           <div class="warn"><span class="k">주의</span>${oneLine(d.contraindication)}</div>
           ${detailOf(d.id) ? `<div><span class="k">복약</span>${dEsc(oneLine(detailOf(d.id).counseling))}</div>` : ''}
